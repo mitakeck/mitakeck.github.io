@@ -1,6 +1,6 @@
 languageCode = "jp"
 title = "My New Hugo Site"
-baseurl = "https://mitakeck.github.io/blog"
+baseurl = "localhost:1313"
 pygmentscodefences = true
 PygmentsStyle = "manni"
 theme = "simple-a"
