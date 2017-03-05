@@ -1,0 +1,4 @@
+languageCode = "jp"
+title = "My New Hugo Site"
+baseurl = "https://mitakeck.github.io/blog"
+pygmentscodefences = true
