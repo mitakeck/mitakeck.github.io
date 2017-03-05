@@ -45,7 +45,7 @@ figure.large img {
 
 figcaption
 {
-    font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+    /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
     background-color: #EFEFEF;
     font-size: 90%;
     margin-left: 1%;
@@ -62,13 +62,13 @@ footer {
  margin-top: 10px;
  font-size: 0.6em;
  text-transform: uppercase;
- font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+ /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
  padding-top: 2em;
  text-align: center;
 }
 
 .content h1 {
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
   color: #3F3F3F;
   font-size: 1.8em;
   text-align: center;
@@ -139,7 +139,7 @@ p {
 .post .content {
   text-align: left;
   margin-top: 3em;
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
   font-size: 18px;
 }
 
@@ -160,7 +160,7 @@ p {
 .post-header h1 {
   font-size: 1.8em;
   color: #444;
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
   margin-bottom: 10px;
 }
 
@@ -177,7 +177,7 @@ p {
 
 .post-time {
   margin-top: 3px;
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
 }
 
 .post-after {
@@ -212,7 +212,7 @@ p {
   display: inline-block;
   margin-bottom: 8px;
   border-bottom: 3px solid #fa5305;
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
 }
 
 .tags a:hover {
@@ -238,12 +238,12 @@ blockquote {
   padding: 0 0 0 15px;
   margin: 0 0 20px;
   border-left: 5px solid #fa5305;
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
   font-size: 18px;
 }
 
 .tag-list {
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
   max-width: 700px;
   margin: auto;
 }
@@ -270,7 +270,7 @@ blockquote {
   text-transform: uppercase;
   text-decoration: none;
   font-size: 15px;
-  font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';
+  /*font-family: 'Helvetica Neue', 'Helvetica','YuGothic', 'Yu Gothic', '游ゴシック', '游ゴシック体', 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS PGothic';*/
   border-bottom: 4px solid #646464;
 }
 
