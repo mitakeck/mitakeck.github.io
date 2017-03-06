@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>My New Hugo Site on My New Hugo Site </title>
+      <title>Oreilly on My New Hugo Site </title>
     <link>localhost:1313</link>
     <language>en-us</language>
     <author>Alexander Ivanov</author>
-    <updated>2017-03-06 02:31:37 &#43;0900 JST</updated>
+    <updated>0001-01-01 00:00:00 &#43;0000 UTC</updated>
     
     <item>
       <title>Oreilly の無料本を自動で入手する方法</title>
@@ -87,39 +87,6 @@ paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;https://github.com/deeplook/freebora&lt;/a&gt; : Download free ebooks from O&amp;rsquo;Reilly.&lt;/li&gt;
 &lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>hugo test</title>
-      <link>localhost:1313</link>
-      <pubDate>Mon, 06 Mar 2017 00:38:19 JST</pubDate>
-      <author>Alexander Ivanov</author>
-      <guid>localhost:1313</guid>
-      <description>
-
-&lt;h1 id=&#34;hugo-のテスト&#34;&gt;hugo のテスト&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;シンタックスハイライトとか&lt;/li&gt;
-&lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s/.*content=\&amp;quot;\(.*\)\&amp;quot;.*/\1/g&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# =&amp;gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg&lt;/span&gt;
-
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s/.*content=\&amp;quot;\(.*\)\&amp;quot;.*/\1/g&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# =&amp;gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg&lt;/span&gt;
-
-% curl -Lso-  http://www.asahi.com/articles/ASHD96K3YHD9UTIL04L.html | grep meta |  grep og:image | sed -e &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s/.*content=\&amp;quot;\(.*\)\&amp;quot;.*/\1/g&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# =&amp;gt; http://www.asahicom.jp/articles/images/AS20151209004367_comm.jpg&lt;/span&gt;
-
-% curl -Lso- http://www.cnn.co.jp/world/35074672.html  | grep meta |  grep og:image | sed -e &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s/.*content=\&amp;quot;\(.*\)\&amp;quot;.*/\1/g&amp;quot;&lt;/span&gt;              
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# =&amp;gt; http://www.cnn.co.jp/storage/2015/12/09/26290e751df22d92b3d72b36a65d95b3/france-russia-police-dog.jpg&lt;/span&gt;
-
-% curl -Lso-  http://ggsoku.com/2015/12/minecraft-for-wii-u-released-1217/ | grep meta |  grep og:image | sed -e &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s/.*content=\&amp;quot;\(.*\)\&amp;quot;.*/\1/g&amp;quot;&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# =&amp;gt; http://ggsoku.com/index.php?aam_media=101921&amp;amp;size=original&lt;/span&gt;
-
-%
-&lt;/pre&gt;&lt;/div&gt;
 </description>
     </item>
     

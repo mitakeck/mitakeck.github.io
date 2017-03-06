@@ -1,0 +1,169 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>@mitakeck - Oreilly の無料本を自動で入手する方法</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="#ZgotmplZ">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="My New Hugo Site">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">        
+  <div id="navbar-inner">
+          <div id="logo">
+            <a href="localhost:1313"><img src="/images/letter-a.png" width="100px"></img></a>
+          </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/oreilly-free-ebooks-dl/">Oreilly の無料本を自動で入手する方法</a></h1>
+	        <div class="post-time">March 6 2017</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	                <a href="localhost:1313/tags/oreilly">oreilly</a>              
+	            
+	                <a href="localhost:1313/tags/ebook">ebook</a>              
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        
+
+<p><a href="https://github.com/deeplook/freebora">freebora</a> という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
+Python で書かれており、ソースコードは Github で公開されている。<br />
+電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。</p>
+
+<hr />
+
+<h2 id="ソースコード探索">ソースコード探索</h2>
+
+<p>探索と言っても重要な部分は  <a href="https://github.com/deeplook/freebora/blob/master/freebora/freebora.py"><code>freebora/freebora/freebora.py</code></a> 内にすべてまとまっていて、大まかに以下の流れで無料電子書籍を抽出/ダウンロードしていた。</p>
+
+<ul>
+<li>1. <code>http://shop.oreilly.com/category/ebooks.do</code> にアクセスしカテゴリ一覧を取得</li>
+<li>2. <code>http://shop.oreilly.com/category/ebooks/[category].do</code> にアクセスし電子書籍一覧を取得</li>
+<li>3. 値段が <code>$0.00</code> に設定されている電子書籍ページ URL を抽出</li>
+<li>4. 対象電子書籍ページの URL を整形して、ダウンロード</li>
+</ul>
+
+<p>処理 4. のダウンロード URL 整形処理に関してだけ補足。</p>
+
+<p>以下に <code>freebora</code> から抜粋したソースコードを掲載する。<br />
+ソースコード内の <code>for</code> 内部が処理 4 となる。
+重要なのは <code>re.sub()</code> で、それぞれの URL を <code>.csp</code> を <code>.pdf</code> に<code>/free/</code> を <code>/free/files/</code> に置換する処理を行っている。</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #555555">...</span>
+<span style="color: #0099FF; font-style: italic"># https://github.com/deeplook/freebora/blob/master/freebora/freebora.py#L56-L73 より引用</span>
+t2 <span style="color: #555555">=</span> etree<span style="color: #555555">.</span>parse(<span style="color: #CC3300">&#39;http://shop.oreilly.com&#39;</span> <span style="color: #555555">+</span> page_url, parser<span style="color: #555555">=</span>p)
+xp <span style="color: #555555">=</span> <span style="color: #CC3300">&#39;//span[@class=&quot;price&quot;][contains(., &quot;$0.00&quot;)]/&#39;</span>\
+     <span style="color: #CC3300">&#39;../../../../div[@class=&quot;thumbheader&quot;]/a/@href&#39;</span>
+paths <span style="color: #555555">=</span> t2<span style="color: #555555">.</span>xpath(xp)
+<span style="color: #006699; font-weight: bold">for</span> j, path <span style="color: #000000; font-weight: bold">in</span> <span style="color: #336666">enumerate</span>(paths):
+    url <span style="color: #555555">=</span> <span style="color: #CC3300">&#39;http://shop.oreilly.com&#39;</span> <span style="color: #555555">+</span> path
+    html <span style="color: #555555">=</span> requests<span style="color: #555555">.</span>get(url)<span style="color: #555555">.</span>text
+    url_csps <span style="color: #555555">=</span> re<span style="color: #555555">.</span>findall(<span style="color: #CC3300">&#39;path_info\:\s+(.*?\.csp)&#39;</span>, html)
+    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #336666">len</span>(url_csps) <span style="color: #555555">!=</span> <span style="color: #FF6600">1</span>:
+        <span style="color: #006699; font-weight: bold">continue</span>
+    url_csp <span style="color: #555555">=</span> url_csps[<span style="color: #FF6600">0</span>]
+    url_csp <span style="color: #555555">=</span> re<span style="color: #555555">.</span>sub(<span style="color: #CC3300">&#39;\?.*&#39;</span>, <span style="color: #CC3300">&#39;&#39;</span>, url_csp)
+    url_pdf <span style="color: #555555">=</span> re<span style="color: #555555">.</span>sub(<span style="color: #CC3300">&#39;\.csp&#39;</span>, <span style="color: #CC3300">&#39;.pdf&#39;</span>, url_csp)
+    url_pdf <span style="color: #555555">=</span> re<span style="color: #555555">.</span>sub(<span style="color: #CC3300">&#39;/free/&#39;</span>, <span style="color: #CC3300">&#39;/free/files/&#39;</span>, url_pdf)
+    u <span style="color: #555555">=</span> <span style="color: #CC3300">&#39;http://www.oreilly.com/</span><span style="color: #AA0000">%s</span><span style="color: #CC3300">&#39;</span> <span style="color: #555555">%</span> url_pdf
+    <span style="color: #006699; font-weight: bold">if</span> verbose:
+        <span style="color: #006699; font-weight: bold">print</span>(u)
+    <span style="color: #006699; font-weight: bold">yield</span> u
+<span style="color: #555555">...</span>
+</pre></div>
+
+<p>実際の無料電子書籍 URL から手動で上記処理 4 を実行してみる。</p>
+
+<p>下記 URL は『Guidelines for Keeping Pace with Innovation and Tech Adoption』という電子書籍のページ。こいつに対してさっきの置換処理を実行する。</p>
+
+<pre><code>http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
+</code></pre>
+
+<p>すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。</p>
+
+<pre><code>http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
+</code></pre>
+
+<h2 id="気づき">気づき</h2>
+
+<h4 id="1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い">1. <code>http://www.oreilly.com/[category]/free/</code> からスクレイプしたほうが早い</h4>
+
+<p><code>category = {&quot;business&quot;, &quot;data&quot;, &quot;iot&quot;, &quot;design&quot;, &quot;programming&quot;, &quot;security&quot;, &quot;web-platform&quot;, &quot;webops&quot;}</code></p>
+
+<h4 id="2-pdf-以外のフォーマットもダウンロードできる">2. PDF 以外のフォーマットもダウンロードできる</h4>
+
+<p><code>.pdf</code> 以外にも <code>.epub</code>, <code>.mobi</code> フォーマットの存在を確認した。</p>
+
+<h2 id="参考-url-等">参考 URL 等</h2>
+
+<ul>
+<li><a href="https://github.com/deeplook/freebora">https://github.com/deeplook/freebora</a> : Download free ebooks from O&rsquo;Reilly.</li>
+</ul>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+     
+    </p>
+</div>
+		<nav id="pagination">
+			
+			<a class="next" href="#ZgotmplZ">Next</a>
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© mitakeck 2017</p>
+		        </footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":change-me";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 4]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="http://change-me" style="border:0;" alt="" /></p></noscript>
+
+
+</html>
+
