@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
       <title>Ebook on mitakeck.github.io </title>
-    <link>localhost:1313</link>
+    <link>http://mitakeck.github.io/tags/ebook/index.xml</link>
     <language>en-us</language>
     <author>Alexander Ivanov</author>
     <updated>0001-01-01 00:00:00 &#43;0000 UTC</updated>
     
     <item>
       <title>Oreilly の無料本を自動で入手する方法</title>
-      <link>localhost:1313</link>
+      <link>http://mitakeck.github.io/oreilly-free-ebooks-dl/</link>
       <pubDate>Mon, 06 Mar 2017 02:31:37 JST</pubDate>
       <author>Alexander Ivanov</author>
-      <guid>localhost:1313</guid>
+      <guid>http://mitakeck.github.io/oreilly-free-ebooks-dl/</guid>
       <description>
 
 &lt;p&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;freebora&lt;/a&gt; という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
