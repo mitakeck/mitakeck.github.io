@@ -13,7 +13,7 @@
     <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
     <link rel="shortcut icon" href="/images/alexfinn.ico">
     <link rel="apple-touch-icon" href="">
-    <link rel="canonical" href="http://mitakeck.github.io/oreilly-free-ebooks-dl/">
+    <link rel="canonical" href="#ZgotmplZ">
 
     
     <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="mitakeck.github.io">
@@ -23,7 +23,7 @@
     <div class="navbar navbar-fixed-top">        
   <div id="navbar-inner">
           <div id="logo">
-            <a href="http://mitakeck.github.io/"><img src="/images/letter-a.png" width="100px"></img></a>
+            <a href="localhost:1313"><img src="/images/letter-a.png" width="100px"></img></a>
           </div>
   </div>
 </div>
@@ -44,9 +44,9 @@
 	    <div class="post-after">
 	        <div class="tags">
 	            
-	                <a href="http://mitakeck.github.io//tags/oreilly">oreilly</a>              
+	                <a href="localhost:1313/tags/oreilly">oreilly</a>              
 	            
-	                <a href="http://mitakeck.github.io//tags/ebook">ebook</a>              
+	                <a href="localhost:1313/tags/ebook">ebook</a>              
 	            
 	        </div>
 	    </div>
@@ -106,20 +106,32 @@ paths <span style="color: #555555">=</span> t2<span style="color: #555555">.</sp
 <pre><code>http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
 </code></pre>
 
+<p><img src="oreilly1.png" alt="oreilly1.png" /></p>
+
 <p>すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。</p>
 
 <pre><code>http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
 </code></pre>
 
+<p><img src="oreilly2.png" alt="oreilly2.png" /></p>
+
 <h2 id="気づき">気づき</h2>
 
-<h4 id="1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い">1. <code>http://www.oreilly.com/[category]/free/</code> からスクレイプしたほうが早い</h4>
+<h3 id="1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い">1.<code>http://www.oreilly.com/[category]/free/</code>からスクレイプしたほうが早い</h3>
 
-<p><code>category = {&quot;business&quot;, &quot;data&quot;, &quot;iot&quot;, &quot;design&quot;, &quot;programming&quot;, &quot;security&quot;, &quot;web-platform&quot;, &quot;webops&quot;}</code></p>
+<p>freedora は <code>http://shop.oreilly.com/category/ebooks/[category].do</code> から無料になっている電子書籍を探していたが、実は Oreilly さんが無料本に関しては <code>http://www.oreilly.com/[category]/free/</code> にまとめてくれている。
+なのでそちらからスクレイピングしたほうが処理としてはスマートになりそう。</p>
 
-<h4 id="2-pdf-以外のフォーマットもダウンロードできる">2. PDF 以外のフォーマットもダウンロードできる</h4>
+<p>ちなみにカテゴリは以下のものがあります</p>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>category <span style="color: #555555">=</span> {<span style="color: #CC3300">&quot;business&quot;</span>, <span style="color: #CC3300">&quot;data&quot;</span>, <span style="color: #CC3300">&quot;iot&quot;</span>, <span style="color: #CC3300">&quot;design&quot;</span>, <span style="color: #CC3300">&quot;programming&quot;</span>, <span style="color: #CC3300">&quot;security&quot;</span>, <span style="color: #CC3300">&quot;web-platform&quot;</span>, <span style="color: #CC3300">&quot;webops&quot;</span>}
+</pre></div>
 
-<p><code>.pdf</code> 以外にも <code>.epub</code>, <code>.mobi</code> フォーマットの存在を確認した。</p>
+<h3 id="2-pdf-以外のフォーマットもダウンロードできる">2. PDF 以外のフォーマットもダウンロードできる</h3>
+
+<p>freedora では PDF 形式の電子書籍をダウンロードしてくるのだが、
+<code>.pdf</code> 以外にも <code>.epub</code>, <code>.mobi</code> フォーマットの存在を確認した。</p>
+
+<p>Kindle Paper で電子書籍を読んでいると <code>.pdf</code> より <code>.mobi</code> のほうが扱いが良かったりするので、必要に合わせてフォーマットを指定すると良さげ。</p>
 
 <h2 id="参考-url-等">参考 URL 等</h2>
 
@@ -136,7 +148,7 @@ paths <span style="color: #555555">=</span> t2<span style="color: #555555">.</sp
 </div>
 		<nav id="pagination">
 			
-			<a class="next" href="http://mitakeck.github.io/page/">Next</a>
+			<a class="next" href="#ZgotmplZ">Next</a>
 		</nav>
 	
 		        <footer>

@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
       <title>mitakeck.github.io on mitakeck.github.io </title>
-    <link>http://mitakeck.github.io/index.xml</link>
+    <link>localhost:1313</link>
     <language>en-us</language>
     <author>Alexander Ivanov</author>
     <updated>2017-03-06 02:31:37 &#43;0900 JST</updated>
     
     <item>
       <title>Oreilly の無料本を自動で入手する方法</title>
-      <link>http://mitakeck.github.io/oreilly-free-ebooks-dl/</link>
+      <link>localhost:1313</link>
       <pubDate>Mon, 06 Mar 2017 02:31:37 JST</pubDate>
       <author>Alexander Ivanov</author>
-      <guid>http://mitakeck.github.io/oreilly-free-ebooks-dl/</guid>
+      <guid>localhost:1313</guid>
       <description>
 
 &lt;p&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;freebora&lt;/a&gt; という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
@@ -67,20 +67,32 @@ paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style
 &lt;pre&gt;&lt;code&gt;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;&lt;img src=&#34;oreilly1.png&#34; alt=&#34;oreilly1.png&#34; /&gt;&lt;/p&gt;
+
 &lt;p&gt;すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;&lt;img src=&#34;oreilly2.png&#34; alt=&#34;oreilly2.png&#34; /&gt;&lt;/p&gt;
+
 &lt;h2 id=&#34;気づき&#34;&gt;気づき&lt;/h2&gt;
 
-&lt;h4 id=&#34;1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い&#34;&gt;1. &lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt; からスクレイプしたほうが早い&lt;/h4&gt;
+&lt;h3 id=&#34;1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い&#34;&gt;1.&lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt;からスクレイプしたほうが早い&lt;/h3&gt;
 
-&lt;p&gt;&lt;code&gt;category = {&amp;quot;business&amp;quot;, &amp;quot;data&amp;quot;, &amp;quot;iot&amp;quot;, &amp;quot;design&amp;quot;, &amp;quot;programming&amp;quot;, &amp;quot;security&amp;quot;, &amp;quot;web-platform&amp;quot;, &amp;quot;webops&amp;quot;}&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;freedora は &lt;code&gt;http://shop.oreilly.com/category/ebooks/[category].do&lt;/code&gt; から無料になっている電子書籍を探していたが、実は Oreilly さんが無料本に関しては &lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt; にまとめてくれている。
+なのでそちらからスクレイピングしたほうが処理としてはスマートになりそう。&lt;/p&gt;
 
-&lt;h4 id=&#34;2-pdf-以外のフォーマットもダウンロードできる&#34;&gt;2. PDF 以外のフォーマットもダウンロードできる&lt;/h4&gt;
+&lt;p&gt;ちなみにカテゴリは以下のものがあります&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;category &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;business&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;data&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;iot&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;design&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;programming&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;security&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;web-platform&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;webops&amp;quot;&lt;/span&gt;}
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;code&gt;.pdf&lt;/code&gt; 以外にも &lt;code&gt;.epub&lt;/code&gt;, &lt;code&gt;.mobi&lt;/code&gt; フォーマットの存在を確認した。&lt;/p&gt;
+&lt;h3 id=&#34;2-pdf-以外のフォーマットもダウンロードできる&#34;&gt;2. PDF 以外のフォーマットもダウンロードできる&lt;/h3&gt;
+
+&lt;p&gt;freedora では PDF 形式の電子書籍をダウンロードしてくるのだが、
+&lt;code&gt;.pdf&lt;/code&gt; 以外にも &lt;code&gt;.epub&lt;/code&gt;, &lt;code&gt;.mobi&lt;/code&gt; フォーマットの存在を確認した。&lt;/p&gt;
+
+&lt;p&gt;Kindle Paper で電子書籍を読んでいると &lt;code&gt;.pdf&lt;/code&gt; より &lt;code&gt;.mobi&lt;/code&gt; のほうが扱いが良かったりするので、必要に合わせてフォーマットを指定すると良さげ。&lt;/p&gt;
 
 &lt;h2 id=&#34;参考-url-等&#34;&gt;参考 URL 等&lt;/h2&gt;
 
@@ -92,10 +104,10 @@ paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style
     
     <item>
       <title>hugo test</title>
-      <link>http://mitakeck.github.io/page/</link>
+      <link>localhost:1313</link>
       <pubDate>Mon, 06 Mar 2017 00:38:19 JST</pubDate>
       <author>Alexander Ivanov</author>
-      <guid>http://mitakeck.github.io/page/</guid>
+      <guid>localhost:1313</guid>
       <description>
 
 &lt;h1 id=&#34;hugo-のテスト&#34;&gt;hugo のテスト&lt;/h1&gt;

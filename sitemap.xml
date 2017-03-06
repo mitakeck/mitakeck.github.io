@@ -2,34 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://mitakeck.github.io/oreilly-free-ebooks-dl/</loc>
+    <loc>localhost:1313</loc>
     <lastmod>2017-03-06T02:31:37+09:00</lastmod>
   </url>
   
   <url>
-    <loc>http://mitakeck.github.io/page/</loc>
+    <loc>localhost:1313</loc>
     <lastmod>2017-03-06T00:38:19+09:00</lastmod>
   </url>
   
   <url>
-    <loc>http://mitakeck.github.io/tags/ebook/</loc>
+    <loc>localhost:1313</loc>
     <lastmod>2017-03-06T02:31:37+09:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://mitakeck.github.io/tags/oreilly/</loc>
+    <loc>localhost:1313</loc>
     <lastmod>2017-03-06T02:31:37+09:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://mitakeck.github.io/tags/</loc>
+    <loc>localhost:1313</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://mitakeck.github.io/</loc>
+    <loc>localhost:1313</loc>
     <lastmod>2017-03-06T02:31:37+09:00</lastmod>
     <priority>0</priority>
   </url>
