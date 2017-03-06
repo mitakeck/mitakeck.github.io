@@ -4,7 +4,6 @@ title = "Oreilly の無料本を自動で入手する方法"
 Categories = []
 Tags = ["oreilly", "ebook"]
 Description = "freebora という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。Python で書かれており、ソースコードは Github で公開されている。電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。"
-
 +++
 
 [freebora](https://github.com/deeplook/freebora) という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
@@ -60,22 +59,35 @@ for j, path in enumerate(paths):
 http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
 ```
 
+![oreilly1.png](oreilly1.png)
+
 すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。
 
 ```
 http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
 ```
 
+![oreilly2.png](oreilly2.png)
+
 ## 気づき
 
-#### 1. `http://www.oreilly.com/[category]/free/` からスクレイプしたほうが早い
+### 1.`http://www.oreilly.com/[category]/free/`からスクレイプしたほうが早い
 
-`category = {"business", "data", "iot", "design", "programming", "security", "web-platform", "webops"}`
+freedora は `http://shop.oreilly.com/category/ebooks/[category].do` から無料になっている電子書籍を探していたが、実は Oreilly さんが無料本に関しては `http://www.oreilly.com/[category]/free/` にまとめてくれている。
+なのでそちらからスクレイピングしたほうが処理としてはスマートになりそう。
 
-#### 2. PDF 以外のフォーマットもダウンロードできる
+ちなみにカテゴリは以下のものがあります
 
+```python
+category = {"business", "data", "iot", "design", "programming", "security", "web-platform", "webops"}
+```
+
+### 2. PDF 以外のフォーマットもダウンロードできる
+
+freedora では PDF 形式の電子書籍をダウンロードしてくるのだが、
 `.pdf` 以外にも `.epub`, `.mobi` フォーマットの存在を確認した。
 
+Kindle Paper で電子書籍を読んでいると `.pdf` より `.mobi` のほうが扱いが良かったりするので、必要に合わせてフォーマットを指定すると良さげ。
 
 ## 参考 URL 等
 
