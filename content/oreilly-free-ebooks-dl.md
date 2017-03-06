@@ -6,6 +6,8 @@ Tags = ["oreilly", "ebook"]
 Description = "freebora という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。Python で書かれており、ソースコードは Github で公開されている。電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。"
 +++
 
+## 概要
+
 [freebora](https://github.com/deeplook/freebora) という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
 Python で書かれており、ソースコードは Github で公開されている。\
 電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。
