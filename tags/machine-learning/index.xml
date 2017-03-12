@@ -17,22 +17,74 @@
 
 &lt;h1 id=&#34;文字画像からフォントを推定したい&#34;&gt;文字画像からフォントを推定したい&lt;/h1&gt;
 
+&lt;p&gt;吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。
+そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。
+それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。&lt;/p&gt;
+
+&lt;p&gt;今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;about.png&#34; alt=&#34;about.png&#34; /&gt;&lt;/p&gt;
+
 &lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;入力は文字が書かれた画像データ
+
+&lt;ul&gt;
+&lt;li&gt;画像サイズは 64x64&lt;/li&gt;
+&lt;li&gt;画像中には 1 文字だけ描画&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;出力は推定した文字のフォント
+
+&lt;ul&gt;
+&lt;li&gt;ただし 推定は以下 10 個のフォントの中から行う&lt;/li&gt;
+&lt;li&gt;futura, gillsans, helvetica, opitma, andalemono, arial, impact, timenewroman, trebuchetms, verdana&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h2 id=&#34;学習データの準備&#34;&gt;学習データの準備&lt;/h2&gt;
 
+&lt;p&gt;なにはともあれとりあえず学習データを用意する。
+今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。&lt;/p&gt;
+
+&lt;p&gt;その際 ImageMagick を用いるとだいぶ楽ができる。&lt;/p&gt;
+
 &lt;h3 id=&#34;imagemagick-で画像を一括生成&#34;&gt;ImageMagick で画像を一括生成&lt;/h3&gt;
 
-&lt;pre&gt;&lt;code&gt;$ brew install imagemagick
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;ImageMagick で指定フォントの文字画像を出力するには &lt;code&gt;font&lt;/code&gt; と &lt;code&gt;label&lt;/code&gt; オプションを最低限指定してやれば良い&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-font&lt;/code&gt; にはフォントを指定&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;label&lt;/code&gt; には描画したい文字を指定&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;あと出力される画像の見栄えの調節用オプションとして &lt;code&gt;background&lt;/code&gt;, &lt;code&gt;fill&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, &lt;code&gt;gravity&lt;/code&gt; 等がある。
+詳しくは &lt;a href=&#34;http://www.imagemagick.org/Usage/text/&#34;&gt;ImageMagick v6 Examples &amp;ndash;
+ Text to Image Handling&lt;/a&gt; を参照のこと。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。&lt;/p&gt;
+
 &lt;pre&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;以下、a-z の画像を出力した例&lt;/p&gt;
+
 &lt;p&gt;&lt;img src=&#34;futura-a.png&#34; alt=&#34;futura-a.png&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;いろいろなフォントで-a-z-の画像を出力する&#34;&gt;いろいろなフォントで a-z の画像を出力する&lt;/h3&gt;
+
+&lt;p&gt;シェル芸で 10 種類分のフォント画像を準備する。
+その際、フォント一覧とフォントファイルの場所を記述した &lt;code&gt;fonts.txt&lt;/code&gt; と、描画する文字データを記述した &lt;code&gt;data.txt&lt;/code&gt; を用いた。&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;join&lt;/code&gt; で &lt;code&gt;fonts.txt&lt;/code&gt; と &lt;code&gt;data.txt&lt;/code&gt; をクロスジョインして &lt;code&gt;awk&lt;/code&gt; で &lt;code&gt;convert&lt;/code&gt; コマンドに文字列整形して &lt;code&gt;sh&lt;/code&gt; で実行しています。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, &#39;{print &amp;quot;convert -background white -fill black -size 64x64 -gravity center -font \&amp;quot;&amp;quot; $3 &amp;quot;\&amp;quot; label:&amp;quot; $4 &amp;quot; train/&amp;quot; $2 &amp;quot;/&amp;quot; $4 &amp;quot;.png&amp;quot;}&#39; | sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;一応実際に使用した &lt;code&gt;fonts.txt&lt;/code&gt; と &lt;code&gt;data.txt&lt;/code&gt; を載せておきます。&lt;/p&gt;
 
 &lt;p&gt;fonts.txt&lt;/p&gt;
 
@@ -101,9 +153,6 @@ z
     |-- timenewroman
     |-- trebuchetms
     `-- verdana
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;pre&gt;&lt;code&gt;$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, &#39;{print &amp;quot;convert -background white -fill black -size 64x64 -gravity center -font \&amp;quot;&amp;quot; $3 &amp;quot;\&amp;quot; label:&amp;quot; $4 &amp;quot; out/&amp;quot; $2 &amp;quot;/&amp;quot; $4 &amp;quot;.png&amp;quot;}&#39; | sh
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h3 id=&#34;学習データのかさ増し&#34;&gt;学習データのかさ増し&lt;/h3&gt;
@@ -183,7 +232,7 @@ model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt
               metrics&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;accuracy&amp;#39;&lt;/span&gt;])
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&#34;model.png&#34; alt=&#34;model.png&#34; /&gt;&lt;/p&gt;
+&lt;!-- ![model.png](model.png) --&gt;
 
 &lt;h2 id=&#34;学習&#34;&gt;学習&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# ハイパーパラメタ&lt;/span&gt;
@@ -271,10 +320,33 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;imshow(img)
 plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;subplot(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)
 plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, tick_label&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;fonts, align&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;center&amp;quot;&lt;/span&gt;)
 &lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;predict&lt;/span&gt;(imagepath):
+    fonts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
+    img &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;)
+    x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;img_to_array(img)
+    x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;expand_dims(x, axis&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;)
+
+    x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; x &lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;255.0&lt;/span&gt;
+
+    pred &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;predict(x)[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]
+    pred_index &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;argmax(pred)
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; pred_index, fonts[pred_index]
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34; /&gt;&lt;/p&gt;
 
+&lt;p&gt;&lt;img src=&#34;confusion_matrix.png&#34; alt=&#34;confusion_matrix.png&#34; /&gt;&lt;/p&gt;
+
 &lt;h2 id=&#34;まとめ&#34;&gt;まとめ&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;ある程度精度は出るっぽいので、対象フォント数を増やしたい
+
+&lt;ul&gt;
+&lt;li&gt;なぜか Helvetica の認識率だけ悪い&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;実際にスマホアプリとかに埋め込みたい&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     

@@ -46,6 +46,8 @@
 	            
 	                <a href="http://mitakeck.github.io//tags/machine-learning">machine learning</a>              
 	            
+	                <a href="http://mitakeck.github.io//tags/conventional-neural-network"> Conventional Neural Network</a>              
+	            
 	                <a href="http://mitakeck.github.io//tags/keras">keras</a>              
 	            
 	                <a href="http://mitakeck.github.io//tags/python">python</a>              
@@ -58,22 +60,74 @@
 
 <h1 id="文字画像からフォントを推定したい">文字画像からフォントを推定したい</h1>
 
+<p>吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。
+そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。
+それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。</p>
+
+<p>今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。</p>
+
+<p><img src="about.png" alt="about.png" /></p>
+
 <h2 id="概要">概要</h2>
+
+<ul>
+<li>入力は文字が書かれた画像データ
+
+<ul>
+<li>画像サイズは 64x64</li>
+<li>画像中には 1 文字だけ描画</li>
+</ul></li>
+<li>出力は推定した文字のフォント
+
+<ul>
+<li>ただし 推定は以下 10 個のフォントの中から行う</li>
+<li>futura, gillsans, helvetica, opitma, andalemono, arial, impact, timenewroman, trebuchetms, verdana</li>
+</ul></li>
+</ul>
 
 <h2 id="学習データの準備">学習データの準備</h2>
 
+<p>なにはともあれとりあえず学習データを用意する。
+今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。</p>
+
+<p>その際 ImageMagick を用いるとだいぶ楽ができる。</p>
+
 <h3 id="imagemagick-で画像を一括生成">ImageMagick で画像を一括生成</h3>
 
-<pre><code>$ brew install imagemagick
-</code></pre>
+<p>ImageMagick で指定フォントの文字画像を出力するには <code>font</code> と <code>label</code> オプションを最低限指定してやれば良い</p>
+
+<ul>
+<li><code>-font</code> にはフォントを指定</li>
+<li><code>label</code> には描画したい文字を指定</li>
+</ul>
+
+<p>あと出力される画像の見栄えの調節用オプションとして <code>background</code>, <code>fill</code>, <code>size</code>, <code>gravity</code> 等がある。
+詳しくは <a href="http://www.imagemagick.org/Usage/text/">ImageMagick v6 Examples &ndash;
+ Text to Image Handling</a> を参照のこと。</p>
 
 <pre><code>$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
 </code></pre>
 
+<p>例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。</p>
+
 <pre><code>$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
 </code></pre>
 
+<p>以下、a-z の画像を出力した例</p>
+
 <p><img src="futura-a.png" alt="futura-a.png" /></p>
+
+<h3 id="いろいろなフォントで-a-z-の画像を出力する">いろいろなフォントで a-z の画像を出力する</h3>
+
+<p>シェル芸で 10 種類分のフォント画像を準備する。
+その際、フォント一覧とフォントファイルの場所を記述した <code>fonts.txt</code> と、描画する文字データを記述した <code>data.txt</code> を用いた。</p>
+
+<p><code>join</code> で <code>fonts.txt</code> と <code>data.txt</code> をクロスジョインして <code>awk</code> で <code>convert</code> コマンドに文字列整形して <code>sh</code> で実行しています。</p>
+
+<pre><code>$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, '{print &quot;convert -background white -fill black -size 64x64 -gravity center -font \&quot;&quot; $3 &quot;\&quot; label:&quot; $4 &quot; train/&quot; $2 &quot;/&quot; $4 &quot;.png&quot;}' | sh
+</code></pre>
+
+<p>一応実際に使用した <code>fonts.txt</code> と <code>data.txt</code> を載せておきます。</p>
 
 <p>fonts.txt</p>
 
@@ -142,9 +196,6 @@ z
     |-- timenewroman
     |-- trebuchetms
     `-- verdana
-</code></pre>
-
-<pre><code>$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, '{print &quot;convert -background white -fill black -size 64x64 -gravity center -font \&quot;&quot; $3 &quot;\&quot; label:&quot; $4 &quot; out/&quot; $2 &quot;/&quot; $4 &quot;.png&quot;}' | sh
 </code></pre>
 
 <h3 id="学習データのかさ増し">学習データのかさ増し</h3>
@@ -224,7 +275,7 @@ model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC
               metrics<span style="color: #555555">=</span>[<span style="color: #CC3300">&#39;accuracy&#39;</span>])
 </pre></div>
 
-<p><img src="model.png" alt="model.png" /></p>
+<!-- ![model.png](model.png) -->
 
 <h2 id="学習">学習</h2>
 <div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># ハイパーパラメタ</span>
@@ -312,10 +363,33 @@ plt<span style="color: #555555">.</span>imshow(img)
 plt<span style="color: #555555">.</span>subplot(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>)
 plt<span style="color: #555555">.</span>barh(lefts, pred, tick_label<span style="color: #555555">=</span>fonts, align<span style="color: #555555">=</span><span style="color: #CC3300">&quot;center&quot;</span>)
 </pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">predict</span>(imagepath):
+    fonts <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
+    img <span style="color: #555555">=</span> image<span style="color: #555555">.</span>load_img(filename, target_size<span style="color: #555555">=</span>(img_height, img_width), grayscale<span style="color: #555555">=</span><span style="color: #336666">True</span>)
+    x <span style="color: #555555">=</span> image<span style="color: #555555">.</span>img_to_array(img)
+    x <span style="color: #555555">=</span> np<span style="color: #555555">.</span>expand_dims(x, axis<span style="color: #555555">=</span><span style="color: #FF6600">0</span>)
+
+    x <span style="color: #555555">=</span> x <span style="color: #555555">/</span> <span style="color: #FF6600">255.0</span>
+
+    pred <span style="color: #555555">=</span> model<span style="color: #555555">.</span>predict(x)[<span style="color: #FF6600">0</span>]
+    pred_index <span style="color: #555555">=</span> np<span style="color: #555555">.</span>argmax(pred)
+    <span style="color: #006699; font-weight: bold">return</span> pred_index, fonts[pred_index]
+</pre></div>
 
 <p><img src="predict.png" alt="predict.png" /></p>
 
+<p><img src="confusion_matrix.png" alt="confusion_matrix.png" /></p>
+
 <h2 id="まとめ">まとめ</h2>
+
+<ul>
+<li>ある程度精度は出るっぽいので、対象フォント数を増やしたい
+
+<ul>
+<li>なぜか Helvetica の認識率だけ悪い</li>
+</ul></li>
+<li>実際にスマホアプリとかに埋め込みたい</li>
+</ul>
 
 	    </div>
 	    
