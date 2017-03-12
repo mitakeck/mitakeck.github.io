@@ -320,6 +320,8 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;imshow(img)
 plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;subplot(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)
 plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, tick_label&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;fonts, align&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;center&amp;quot;&lt;/span&gt;)
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34; /&gt;&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;predict&lt;/span&gt;(imagepath):
     fonts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
     img &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;)
@@ -332,8 +334,50 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, ti
     pred_index &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;argmax(pred)
     &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; pred_index, fonts[pred_index]
 &lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;a&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;b&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;c&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;d&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;e&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;f&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;g&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;h&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;i&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;j&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;l&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;m&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;o&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;q&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;r&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;t&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;u&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;w&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;x&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;y&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;z&amp;quot;&lt;/span&gt;]
 
-&lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34; /&gt;&lt;/p&gt;
+acc &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [[], [], [], [], [], [], [], [], [], []]
+incre &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1.0&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;260.0&lt;/span&gt;
+
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; font &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; fonts:
+    font_index &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; fonts&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;index(font)
+    acc[font_index] &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;]
+    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; d &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; data:
+        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;xrange&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;):
+            &lt;span style=&#34;color: #336666&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;../datasets/data/validation/&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; font &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; d &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;-091&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;str&lt;/span&gt;(i) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.png&amp;quot;&lt;/span&gt;
+            pred &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; predict(&lt;span style=&#34;color: #336666&#34;&gt;file&lt;/span&gt;)
+            acc[font_index][pred[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]] &lt;span style=&#34;color: #555555&#34;&gt;+=&lt;/span&gt; incre
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h3 id=&#34;混合行列を描画する&#34;&gt;混合行列を描画する&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; specgram
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.metrics&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; confusion_matrix
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.svm&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; LinearSVC
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.utils&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; resample
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;matplotlib&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; pylab
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;numpy&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;np&lt;/span&gt;
+
+cm &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; acc
+name_list &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
+title &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Font Prediction&amp;quot;&lt;/span&gt;
+
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;clf()
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;matshow(cm, fignum&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;False&lt;/span&gt;, cmap&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Blues&amp;#39;&lt;/span&gt;, vmin&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, vmax&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)
+ax &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;axes()
+ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_xticks(&lt;span style=&#34;color: #336666&#34;&gt;range&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;len&lt;/span&gt;(name_list)))
+ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_xticklabels(name_list, rotation&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;90&lt;/span&gt;)
+ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;xaxis&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_ticks_position(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;bottom&amp;quot;&lt;/span&gt;)
+ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_yticks(&lt;span style=&#34;color: #336666&#34;&gt;range&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;len&lt;/span&gt;(name_list)))
+ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_yticklabels(name_list)
+
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;title(title)
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;colorbar()
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;grid(&lt;span style=&#34;color: #336666&#34;&gt;False&lt;/span&gt;)
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;xlabel(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Predict class&amp;#39;&lt;/span&gt;)
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;ylabel(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;True class&amp;#39;&lt;/span&gt;)
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;grid(&lt;span style=&#34;color: #336666&#34;&gt;False&lt;/span&gt;)
+pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;show()
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;img src=&#34;confusion_matrix.png&#34; alt=&#34;confusion_matrix.png&#34; /&gt;&lt;/p&gt;
 
@@ -343,9 +387,9 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, ti
 &lt;li&gt;ある程度精度は出るっぽいので、対象フォント数を増やしたい
 
 &lt;ul&gt;
-&lt;li&gt;なぜか Helvetica の認識率だけ悪い&lt;/li&gt;
+&lt;li&gt;なぜか Helvetica の認識率だけ悪いのは気になる&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;実際にスマホアプリとかに埋め込みたい&lt;/li&gt;
+&lt;li&gt;実際にフォント推定器をスマホアプリとかに埋め込みたい&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>

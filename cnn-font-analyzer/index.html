@@ -363,6 +363,8 @@ plt<span style="color: #555555">.</span>imshow(img)
 plt<span style="color: #555555">.</span>subplot(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>)
 plt<span style="color: #555555">.</span>barh(lefts, pred, tick_label<span style="color: #555555">=</span>fonts, align<span style="color: #555555">=</span><span style="color: #CC3300">&quot;center&quot;</span>)
 </pre></div>
+
+<p><img src="predict.png" alt="predict.png" /></p>
 <div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">predict</span>(imagepath):
     fonts <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
     img <span style="color: #555555">=</span> image<span style="color: #555555">.</span>load_img(filename, target_size<span style="color: #555555">=</span>(img_height, img_width), grayscale<span style="color: #555555">=</span><span style="color: #336666">True</span>)
@@ -375,8 +377,50 @@ plt<span style="color: #555555">.</span>barh(lefts, pred, tick_label<span style=
     pred_index <span style="color: #555555">=</span> np<span style="color: #555555">.</span>argmax(pred)
     <span style="color: #006699; font-weight: bold">return</span> pred_index, fonts[pred_index]
 </pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>data <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;a&quot;</span>, <span style="color: #CC3300">&quot;b&quot;</span>, <span style="color: #CC3300">&quot;c&quot;</span>, <span style="color: #CC3300">&quot;d&quot;</span>, <span style="color: #CC3300">&quot;e&quot;</span>, <span style="color: #CC3300">&quot;f&quot;</span>, <span style="color: #CC3300">&quot;g&quot;</span>, <span style="color: #CC3300">&quot;h&quot;</span>, <span style="color: #CC3300">&quot;i&quot;</span>, <span style="color: #CC3300">&quot;j&quot;</span>, <span style="color: #CC3300">&quot;k&quot;</span>, <span style="color: #CC3300">&quot;l&quot;</span>, <span style="color: #CC3300">&quot;m&quot;</span>, <span style="color: #CC3300">&quot;n&quot;</span>, <span style="color: #CC3300">&quot;o&quot;</span>, <span style="color: #CC3300">&quot;p&quot;</span>, <span style="color: #CC3300">&quot;q&quot;</span>, <span style="color: #CC3300">&quot;r&quot;</span>, <span style="color: #CC3300">&quot;s&quot;</span>, <span style="color: #CC3300">&quot;t&quot;</span>, <span style="color: #CC3300">&quot;u&quot;</span>, <span style="color: #CC3300">&quot;v&quot;</span>, <span style="color: #CC3300">&quot;w&quot;</span>, <span style="color: #CC3300">&quot;x&quot;</span>, <span style="color: #CC3300">&quot;y&quot;</span>, <span style="color: #CC3300">&quot;z&quot;</span>]
 
-<p><img src="predict.png" alt="predict.png" /></p>
+acc <span style="color: #555555">=</span> [[], [], [], [], [], [], [], [], [], []]
+incre <span style="color: #555555">=</span> <span style="color: #FF6600">1.0</span> <span style="color: #555555">/</span> <span style="color: #FF6600">260.0</span>
+
+<span style="color: #006699; font-weight: bold">for</span> font <span style="color: #000000; font-weight: bold">in</span> fonts:
+    font_index <span style="color: #555555">=</span> fonts<span style="color: #555555">.</span>index(font)
+    acc[font_index] <span style="color: #555555">=</span> [<span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>]
+    <span style="color: #006699; font-weight: bold">for</span> d <span style="color: #000000; font-weight: bold">in</span> data:
+        <span style="color: #006699; font-weight: bold">for</span> i <span style="color: #000000; font-weight: bold">in</span> <span style="color: #336666">xrange</span>(<span style="color: #FF6600">10</span>):
+            <span style="color: #336666">file</span> <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/validation/&quot;</span> <span style="color: #555555">+</span> font <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;/&quot;</span> <span style="color: #555555">+</span> d <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;-091&quot;</span> <span style="color: #555555">+</span> <span style="color: #336666">str</span>(i) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;.png&quot;</span>
+            pred <span style="color: #555555">=</span> predict(<span style="color: #336666">file</span>)
+            acc[font_index][pred[<span style="color: #FF6600">0</span>]] <span style="color: #555555">+=</span> incre
+</pre></div>
+
+<h3 id="混合行列を描画する">混合行列を描画する</h3>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">matplotlib.pyplot</span> <span style="color: #006699; font-weight: bold">import</span> specgram
+<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">sklearn.metrics</span> <span style="color: #006699; font-weight: bold">import</span> confusion_matrix
+<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">sklearn.svm</span> <span style="color: #006699; font-weight: bold">import</span> LinearSVC
+<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">sklearn.utils</span> <span style="color: #006699; font-weight: bold">import</span> resample
+<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">matplotlib</span> <span style="color: #006699; font-weight: bold">import</span> pylab
+<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">numpy</span> <span style="color: #006699; font-weight: bold">as</span> <span style="color: #00CCFF; font-weight: bold">np</span>
+
+cm <span style="color: #555555">=</span> acc
+name_list <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
+title <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;Font Prediction&quot;</span>
+
+pylab<span style="color: #555555">.</span>clf()
+pylab<span style="color: #555555">.</span>matshow(cm, fignum<span style="color: #555555">=</span><span style="color: #336666">False</span>, cmap<span style="color: #555555">=</span><span style="color: #CC3300">&#39;Blues&#39;</span>, vmin<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, vmax<span style="color: #555555">=</span><span style="color: #FF6600">1</span>)
+ax <span style="color: #555555">=</span> pylab<span style="color: #555555">.</span>axes()
+ax<span style="color: #555555">.</span>set_xticks(<span style="color: #336666">range</span>(<span style="color: #336666">len</span>(name_list)))
+ax<span style="color: #555555">.</span>set_xticklabels(name_list, rotation<span style="color: #555555">=</span><span style="color: #FF6600">90</span>)
+ax<span style="color: #555555">.</span>xaxis<span style="color: #555555">.</span>set_ticks_position(<span style="color: #CC3300">&quot;bottom&quot;</span>)
+ax<span style="color: #555555">.</span>set_yticks(<span style="color: #336666">range</span>(<span style="color: #336666">len</span>(name_list)))
+ax<span style="color: #555555">.</span>set_yticklabels(name_list)
+
+pylab<span style="color: #555555">.</span>title(title)
+pylab<span style="color: #555555">.</span>colorbar()
+pylab<span style="color: #555555">.</span>grid(<span style="color: #336666">False</span>)
+pylab<span style="color: #555555">.</span>xlabel(<span style="color: #CC3300">&#39;Predict class&#39;</span>)
+pylab<span style="color: #555555">.</span>ylabel(<span style="color: #CC3300">&#39;True class&#39;</span>)
+pylab<span style="color: #555555">.</span>grid(<span style="color: #336666">False</span>)
+pylab<span style="color: #555555">.</span>show()
+</pre></div>
 
 <p><img src="confusion_matrix.png" alt="confusion_matrix.png" /></p>
 
@@ -386,9 +430,9 @@ plt<span style="color: #555555">.</span>barh(lefts, pred, tick_label<span style=
 <li>ある程度精度は出るっぽいので、対象フォント数を増やしたい
 
 <ul>
-<li>なぜか Helvetica の認識率だけ悪い</li>
+<li>なぜか Helvetica の認識率だけ悪いのは気になる</li>
 </ul></li>
-<li>実際にスマホアプリとかに埋め込みたい</li>
+<li>実際にフォント推定器をスマホアプリとかに埋め込みたい</li>
 </ul>
 
 	    </div>
