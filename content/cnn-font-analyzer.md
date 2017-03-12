@@ -2,33 +2,74 @@
 date = "2017-03-12T14:45:51+09:00"
 title = "文字画像からフォントを推定する"
 Categories = []
-Tags = ["machine learning", "keras", "python"]
-Description = ""
+Tags = ["machine learning", " Conventional Neural Network", "keras", "python"]
+Description = "吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。"
 
 +++
 
 # 文字画像からフォントを推定したい
 
+吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。
+そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。
+それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。
+
+今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。
+
+![about.png](about.png)
+
 ## 概要
+
+- 入力は文字が書かれた画像データ
+  - 画像サイズは 64x64
+  - 画像中には 1 文字だけ描画
+- 出力は推定した文字のフォント
+  - ただし 推定は以下 10 個のフォントの中から行う
+  - futura, gillsans, helvetica, opitma, andalemono, arial, impact, timenewroman, trebuchetms, verdana
 
 ## 学習データの準備
 
+なにはともあれとりあえず学習データを用意する。
+今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。
+
+その際 ImageMagick を用いるとだいぶ楽ができる。
+
 ### ImageMagick で画像を一括生成
 
-```
-$ brew install imagemagick
-```
+ImageMagick で指定フォントの文字画像を出力するには `font` と `label` オプションを最低限指定してやれば良い
+
+ - `-font` にはフォントを指定
+ - `label` には描画したい文字を指定
+
+ あと出力される画像の見栄えの調節用オプションとして `background`, `fill`, `size`, `gravity` 等がある。
+詳しくは [ImageMagick v6 Examples --
+ Text to Image Handling](http://www.imagemagick.org/Usage/text/) を参照のこと。
 
 ```
 $ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
 ```
 
+例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。
 
 ```
 $ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
 ```
 
+以下、a-z の画像を出力した例
+
 ![futura-a.png](futura-a.png)
+
+### いろいろなフォントで a-z の画像を出力する
+
+シェル芸で 10 種類分のフォント画像を準備する。
+その際、フォント一覧とフォントファイルの場所を記述した `fonts.txt` と、描画する文字データを記述した `data.txt` を用いた。
+
+`join` で `fonts.txt` と `data.txt` をクロスジョインして `awk` で `convert` コマンドに文字列整形して `sh` で実行しています。
+
+```
+$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, '{print "convert -background white -fill black -size 64x64 -gravity center -font \"" $3 "\" label:" $4 " train/" $2 "/" $4 ".png"}' | sh
+```
+
+一応実際に使用した `fonts.txt` と `data.txt` を載せておきます。
 
 fonts.txt
 ```
@@ -43,7 +84,6 @@ timenewroman,/Library/Fonts/Times New Roman.ttf
 trebuchetms,/Library/Fonts/Trebuchet MS.ttf
 verdana,/Library/Fonts/Verdana.ttf
 ```
-
 
 data.txt
 
@@ -102,12 +142,6 @@ z
     |-- trebuchetms
     `-- verdana
 ```
-
-```
-$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, '{print "convert -background white -fill black -size 64x64 -gravity center -font \"" $3 "\" label:" $4 " out/" $2 "/" $4 ".png"}' | sh
-```
-
-
 
 ### 学習データのかさ増し
 
@@ -197,8 +231,7 @@ model.compile(loss='binary_crossentropy',
               metrics=['accuracy'])
 ```
 
-![model.png](model.png)
-
+<!-- ![model.png](model.png) -->
 
 
 ## 学習
@@ -299,6 +332,28 @@ plt.subplot(2, 1, 2)
 plt.barh(lefts, pred, tick_label=fonts, align="center")
 ```
 
+
+```python
+def predict(imagepath):
+    fonts = ["andalemono", "arial", "futura", "gillsans", "helvetica", "impact", "opitma", "timenewroman", "trebuchetms", "verdana"]
+    img = image.load_img(filename, target_size=(img_height, img_width), grayscale=True)
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+
+    x = x / 255.0
+
+    pred = model.predict(x)[0]
+    pred_index = np.argmax(pred)
+    return pred_index, fonts[pred_index]
+```
+
 ![predict.png](predict.png)
 
+![confusion_matrix.png](confusion_matrix.png)
+
+
 ## まとめ
+
+- ある程度精度は出るっぽいので、対象フォント数を増やしたい
+  - なぜか Helvetica の認識率だけ悪い
+- 実際にスマホアプリとかに埋め込みたい
