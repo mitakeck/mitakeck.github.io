@@ -1,0 +1,344 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>mitakeck - 文字画像からフォントを推定する</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="http://mitakeck.github.io/cnn-font-analyzer/">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="mitakeck.github.io">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">        
+  <div id="navbar-inner">
+          <div id="logo">
+            <a href="http://mitakeck.github.io/"><img src="/images/letter-a.png" width="100px"></img></a>
+          </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/cnn-font-analyzer/">文字画像からフォントを推定する</a></h1>
+	        <div class="post-time">March 12 2017</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	                <a href="http://mitakeck.github.io//tags/machine-learning">machine learning</a>              
+	            
+	                <a href="http://mitakeck.github.io//tags/keras">keras</a>              
+	            
+	                <a href="http://mitakeck.github.io//tags/python">python</a>              
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        
+
+<h1 id="文字画像からフォントを推定したい">文字画像からフォントを推定したい</h1>
+
+<h2 id="概要">概要</h2>
+
+<h2 id="学習データの準備">学習データの準備</h2>
+
+<h3 id="imagemagick-で画像を一括生成">ImageMagick で画像を一括生成</h3>
+
+<pre><code>$ brew install imagemagick
+</code></pre>
+
+<pre><code>$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
+</code></pre>
+
+<pre><code>$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
+</code></pre>
+
+<p><img src="futura-a.png" alt="futura-a.png" /></p>
+
+<p>fonts.txt</p>
+
+<pre><code>futura,/Library/Fonts/Futura.ttc
+gillsans,/Library/Fonts/GillSans.ttc
+helvetica,/System/Library/Fonts/HelveticaNeueDeskInterface.ttc
+opitma,/System/Library/Fonts/Optima.ttc
+andalemono,/Library/Fonts/Andale Mono.ttf
+arial,/Library/Fonts/Arial.ttf
+impact,/Library/Fonts/Impact.ttf
+timenewroman,/Library/Fonts/Times New Roman.ttf
+trebuchetms,/Library/Fonts/Trebuchet MS.ttf
+verdana,/Library/Fonts/Verdana.ttf
+</code></pre>
+
+<p>data.txt</p>
+
+<pre><code>a
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+t
+u
+v
+w
+x
+y
+z
+</code></pre>
+
+<pre><code>.
+|-- train
+|   |-- andalemono
+|   |-- arial
+|   |-- futura
+|   |-- gillsans
+|   |-- helvetica
+|   |-- impact
+|   |-- opitma
+|   |-- timenewroman
+|   |-- trebuchetms
+|   `-- verdana
+`-- validation
+    |-- andalemono
+    |-- arial
+    |-- futura
+    |-- gillsans
+    |-- helvetica
+    |-- impact
+    |-- opitma
+    |-- timenewroman
+    |-- trebuchetms
+    `-- verdana
+</code></pre>
+
+<pre><code>$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, '{print &quot;convert -background white -fill black -size 64x64 -gravity center -font \&quot;&quot; $3 &quot;\&quot; label:&quot; $4 &quot; out/&quot; $2 &quot;/&quot; $4 &quot;.png&quot;}' | sh
+</code></pre>
+
+<h3 id="学習データのかさ増し">学習データのかさ増し</h3>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">rotate</span>(src):
+    rows,cols <span style="color: #555555">=</span> src<span style="color: #555555">.</span>shape
+    r <span style="color: #555555">=</span> random<span style="color: #555555">.</span>uniform(<span style="color: #FF6600">0</span>, <span style="color: #FF6600">360</span>)
+    M <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>getRotationMatrix2D((cols<span style="color: #555555">/</span><span style="color: #FF6600">2</span>,rows<span style="color: #555555">/</span><span style="color: #FF6600">2</span>), r, <span style="color: #FF6600">1</span>)
+
+    <span style="color: #006699; font-weight: bold">return</span> cv2<span style="color: #555555">.</span>warpAffine(src, M, (rows, cols), flags<span style="color: #555555">=</span>cv2<span style="color: #555555">.</span>INTER_LINEAR)
+
+<span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">move</span>(src):
+    rows,cols <span style="color: #555555">=</span> src<span style="color: #555555">.</span>shape
+    dx <span style="color: #555555">=</span> random<span style="color: #555555">.</span>uniform(<span style="color: #FF6600">0</span>, <span style="color: #FF6600">5</span>)
+    dy <span style="color: #555555">=</span> random<span style="color: #555555">.</span>uniform(<span style="color: #FF6600">0</span>, <span style="color: #FF6600">5</span>)
+    M <span style="color: #555555">=</span> np<span style="color: #555555">.</span>float32([[<span style="color: #FF6600">1</span>, <span style="color: #FF6600">0</span>, dx],[<span style="color: #FF6600">0</span>, <span style="color: #FF6600">1</span>, dy]])
+
+    <span style="color: #006699; font-weight: bold">return</span> cv2<span style="color: #555555">.</span>warpAffine(src,M,(cols,rows))
+</pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">make</span>(imgs, pathToDataset, pathToDatasetSaved, n<span style="color: #555555">=</span><span style="color: #FF6600">100</span>):
+    <span style="color: #006699; font-weight: bold">for</span> img <span style="color: #000000; font-weight: bold">in</span> imgs:
+        <span style="color: #006699; font-weight: bold">if</span> img<span style="color: #555555">.</span>find(<span style="color: #CC3300">&quot;.png&quot;</span>) <span style="color: #555555">&gt;</span> <span style="color: #555555">-</span><span style="color: #FF6600">1</span> :
+            src <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>imread(pathToDataset <span style="color: #555555">+</span> img, <span style="color: #FF6600">0</span>)
+            src <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>resize(src, (imgSize, imgSize))
+            src <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>bitwise_not(src)
+            prefix <span style="color: #555555">=</span> img<span style="color: #555555">.</span>split(<span style="color: #CC3300">&quot;.&quot;</span>)[<span style="color: #FF6600">0</span>]
+            <span style="color: #006699; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #336666">xrange</span>(<span style="color: #FF6600">1</span>, n):
+                dst <span style="color: #555555">=</span> move(rotate(move(rotate(src))))
+                cv2<span style="color: #555555">.</span>imwrite(pathToDatasetSaved <span style="color: #555555">+</span> prefix <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;-&quot;</span> <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;{0:04d}&quot;</span><span style="color: #555555">.</span>format(x) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;.png&quot;</span>, dst)
+</pre></div>
+
+<h3 id="imagerdatagenherator-作成">ImagerDataGenherator 作成</h3>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>img_width, img_height <span style="color: #555555">=</span> <span style="color: #FF6600">64</span>, <span style="color: #FF6600">64</span>
+
+train_data_dir <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/train&quot;</span>
+validation_data_dir <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/validation&quot;</span>
+
+datagen <span style="color: #555555">=</span> ImageDataGenerator(rescale<span style="color: #555555">=</span><span style="color: #FF6600">1.</span><span style="color: #555555">/</span><span style="color: #FF6600">255</span>)
+
+train_generator <span style="color: #555555">=</span> datagen<span style="color: #555555">.</span>flow_from_directory(
+        train_data_dir,
+        target_size<span style="color: #555555">=</span>(img_width, img_height),
+        batch_size<span style="color: #555555">=</span><span style="color: #FF6600">64</span>,
+        color_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;grayscale&quot;</span>,
+        class_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;categorical&quot;</span>)
+
+validation_generator <span style="color: #555555">=</span> datagen<span style="color: #555555">.</span>flow_from_directory(
+        validation_data_dir,
+        target_size<span style="color: #555555">=</span>(img_width, img_height),
+        batch_size<span style="color: #555555">=</span><span style="color: #FF6600">64</span>,
+        color_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;grayscale&quot;</span>,
+        class_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;categorical&quot;</span>)
+</pre></div>
+
+<h2 id="学習モデル作成">学習モデル作成</h2>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>model <span style="color: #555555">=</span> Sequential()
+model<span style="color: #555555">.</span>add(Convolution2D(<span style="color: #FF6600">32</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">3</span>, input_shape<span style="color: #555555">=</span>(img_width, img_height, <span style="color: #FF6600">1</span>)))
+model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
+model<span style="color: #555555">.</span>add(MaxPooling2D(pool_size<span style="color: #555555">=</span>(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">2</span>)))
+
+model<span style="color: #555555">.</span>add(Convolution2D(<span style="color: #FF6600">32</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">3</span>))
+model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
+model<span style="color: #555555">.</span>add(MaxPooling2D(pool_size<span style="color: #555555">=</span>(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">2</span>)))
+
+model<span style="color: #555555">.</span>add(Convolution2D(<span style="color: #FF6600">64</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">3</span>))
+model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
+model<span style="color: #555555">.</span>add(MaxPooling2D(pool_size<span style="color: #555555">=</span>(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">2</span>)))
+
+model<span style="color: #555555">.</span>add(Flatten())
+model<span style="color: #555555">.</span>add(Dense(<span style="color: #FF6600">64</span>))
+model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
+model<span style="color: #555555">.</span>add(Dropout(<span style="color: #FF6600">0.5</span>))
+model<span style="color: #555555">.</span>add(Dense(<span style="color: #FF6600">10</span>))
+model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;sigmoid&#39;</span>))
+</pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>model<span style="color: #555555">.</span>compile(loss<span style="color: #555555">=</span><span style="color: #CC3300">&#39;binary_crossentropy&#39;</span>,
+              optimizer<span style="color: #555555">=</span><span style="color: #CC3300">&#39;Adam&#39;</span>,
+              metrics<span style="color: #555555">=</span>[<span style="color: #CC3300">&#39;accuracy&#39;</span>])
+</pre></div>
+
+<p><img src="model.png" alt="model.png" /></p>
+
+<h2 id="学習">学習</h2>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># ハイパーパラメタ</span>
+nb_epoch <span style="color: #555555">=</span> <span style="color: #FF6600">300</span>
+nb_train_samples <span style="color: #555555">=</span> <span style="color: #FF6600">2048</span>
+nb_validation_samples <span style="color: #555555">=</span> <span style="color: #FF6600">832</span>
+</pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># 学習を行う</span>
+<span style="color: #0099FF; font-style: italic"># fit_generator() の返り値に学習過程のデータが得られる</span>
+history <span style="color: #555555">=</span> model<span style="color: #555555">.</span>fit_generator(
+        train_generator,
+        samples_per_epoch<span style="color: #555555">=</span>nb_train_samples,
+        nb_epoch<span style="color: #555555">=</span>nb_epoch,
+        validation_data<span style="color: #555555">=</span>validation_generator,
+        nb_val_samples<span style="color: #555555">=</span>nb_validation_samples)
+</pre></div>
+
+<pre><code>Epoch 1/300
+2048/2048 [==============================] - 13s - loss: 0.4733 - acc: 0.8062 - val_loss: 0.3308 - val_acc: 0.9000
+Epoch 2/300
+2048/2048 [==============================] - 13s - loss: 0.3765 - acc: 0.8884 - val_loss: 0.3329 - val_acc: 0.9000
+Epoch 3/300
+2048/2048 [==============================] - 13s - loss: 0.3564 - acc: 0.8953 - val_loss: 0.3154 - val_acc: 0.9000
+Epoch 4/300
+2048/2048 [==============================] - 13s - loss: 0.3380 - acc: 0.9006 - val_loss: 0.2956 - val_acc: 0.9065
+Epoch 5/300
+2048/2048 [==============================] - 13s - loss: 0.3192 - acc: 0.9038 - val_loss: 0.2766 - val_acc: 0.9096
+Epoch 6/300
+2048/2048 [==============================] - 13s - loss: 0.3063 - acc: 0.9046 - val_loss: 0.2622 - val_acc: 0.9115
+Epoch 7/300
+2048/2048 [==============================] - 11s - loss: 0.2888 - acc: 0.9069 - val_loss: 0.2560 - val_acc: 0.9094
+Epoch 8/300
+2048/2048 [==============================] - 14s - loss: 0.2742 - acc: 0.9099 - val_loss: 0.2484 - val_acc: 0.9142
+...
+Epoch 294/300
+2048/2048 [==============================] - 13s - loss: 0.0990 - acc: 0.9522 - val_loss: 0.0822 - val_acc: 0.9609
+Epoch 295/300
+2048/2048 [==============================] - 12s - loss: 0.0921 - acc: 0.9552 - val_loss: 0.0736 - val_acc: 0.9619
+Epoch 296/300
+2048/2048 [==============================] - 12s - loss: 0.0890 - acc: 0.9564 - val_loss: 0.0707 - val_acc: 0.9650
+Epoch 297/300
+2048/2048 [==============================] - 13s - loss: 0.0954 - acc: 0.9535 - val_loss: 0.0735 - val_acc: 0.9612
+Epoch 298/300
+2048/2048 [==============================] - 14s - loss: 0.0904 - acc: 0.9543 - val_loss: 0.0699 - val_acc: 0.9643
+Epoch 299/300
+2048/2048 [==============================] - 13s - loss: 0.0869 - acc: 0.9557 - val_loss: 0.0710 - val_acc: 0.9632
+Epoch 300/300
+2048/2048 [==============================] - 13s - loss: 0.0913 - acc: 0.9562 - val_loss: 0.0725 - val_acc: 0.9619
+</code></pre>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">print</span> model<span style="color: #555555">.</span>evaluate_generator(validation_generator, nb_validation_samples)
+<span style="color: #0099FF; font-style: italic"># [0.068484609230206564, 0.9645432738157419]</span>
+<span style="color: #0099FF; font-style: italic"># loss と accuracy の値が得られる</span>
+</pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># モデルを保存する</span>
+model<span style="color: #555555">.</span>save_weights(<span style="color: #CC3300">&#39;e300.h5&#39;</span>)
+</pre></div>
+
+<p><img src="modelacc.png" alt="modelacc.png" />
+<img src="modelloss.png" alt="modelloss.png" /></p>
+
+<h2 id="実験">実験</h2>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># 推定処理</span>
+<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">keras.preprocessing</span> <span style="color: #006699; font-weight: bold">import</span> image
+fonts <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
+lefts <span style="color: #555555">=</span> np<span style="color: #555555">.</span>array([<span style="color: #FF6600">0</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">4</span>, <span style="color: #FF6600">5</span>, <span style="color: #FF6600">6</span>, <span style="color: #FF6600">7</span>, <span style="color: #FF6600">8</span>, <span style="color: #FF6600">9</span>])
+
+<span style="color: #0099FF; font-style: italic"># 学習済みの重みをロード</span>
+model<span style="color: #555555">.</span>load_weights(<span style="color: #CC3300">&#39;e300.h5&#39;</span>)
+model<span style="color: #555555">.</span>compile(loss<span style="color: #555555">=</span><span style="color: #CC3300">&#39;binary_crossentropy&#39;</span>,
+              optimizer<span style="color: #555555">=</span><span style="color: #CC3300">&#39;Adam&#39;</span>,
+              metrics<span style="color: #555555">=</span>[<span style="color: #CC3300">&#39;accuracy&#39;</span>])
+
+<span style="color: #0099FF; font-style: italic"># 適当にデータを読み込ませる</span>
+filename <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/validation/andalemono/f-0911.png&quot;</span>
+
+img <span style="color: #555555">=</span> image<span style="color: #555555">.</span>load_img(filename, target_size<span style="color: #555555">=</span>(img_height, img_width), grayscale<span style="color: #555555">=</span><span style="color: #336666">True</span>)
+x <span style="color: #555555">=</span> image<span style="color: #555555">.</span>img_to_array(img)
+x <span style="color: #555555">=</span> np<span style="color: #555555">.</span>expand_dims(x, axis<span style="color: #555555">=</span><span style="color: #FF6600">0</span>)
+
+x <span style="color: #555555">=</span> x <span style="color: #555555">/</span> <span style="color: #FF6600">255.0</span>
+
+pred <span style="color: #555555">=</span> model<span style="color: #555555">.</span>predict(x)[<span style="color: #FF6600">0</span>]
+plt<span style="color: #555555">.</span>subplot(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">1</span>)
+plt<span style="color: #555555">.</span>imshow(img)
+plt<span style="color: #555555">.</span>subplot(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>)
+plt<span style="color: #555555">.</span>barh(lefts, pred, tick_label<span style="color: #555555">=</span>fonts, align<span style="color: #555555">=</span><span style="color: #CC3300">&quot;center&quot;</span>)
+</pre></div>
+
+<p><img src="predict.png" alt="predict.png" /></p>
+
+<h2 id="まとめ">まとめ</h2>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+     
+    </p>
+</div>
+		<nav id="pagination">
+			
+			<a class="next" href="http://mitakeck.github.io/oreilly-free-ebooks-dl/">Next</a>
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© mitakeck 2017</p>
+		        </footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+</html>
+

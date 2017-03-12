@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://mitakeck.github.io/cnn-font-analyzer/</loc>
+    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://mitakeck.github.io/oreilly-free-ebooks-dl/</loc>
     <lastmod>2017-03-06T02:31:37+09:00</lastmod>
   </url>
@@ -18,8 +23,26 @@
   </url>
   
   <url>
+    <loc>http://mitakeck.github.io/tags/keras/</loc>
+    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://mitakeck.github.io/tags/machine-learning/</loc>
+    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>http://mitakeck.github.io/tags/oreilly/</loc>
     <lastmod>2017-03-06T02:31:37+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://mitakeck.github.io/tags/python/</loc>
+    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -30,7 +53,7 @@
   
   <url>
     <loc>http://mitakeck.github.io/</loc>
-    <lastmod>2017-03-06T02:31:37+09:00</lastmod>
+    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
     <priority>0</priority>
   </url>
   

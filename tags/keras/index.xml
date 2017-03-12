@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>mitakeck.github.io on mitakeck.github.io </title>
-    <link>http://mitakeck.github.io/index.xml</link>
+      <title>Keras on mitakeck.github.io </title>
+    <link>http://mitakeck.github.io/tags/keras/index.xml</link>
     <language>en-us</language>
     <author>Alexander Ivanov</author>
-    <updated>2017-03-12 14:45:51 &#43;0900 JST</updated>
+    <updated>0001-01-01 00:00:00 &#43;0000 UTC</updated>
     
     <item>
       <title>文字画像からフォントを推定する</title>
@@ -275,135 +275,6 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, ti
 &lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;まとめ&#34;&gt;まとめ&lt;/h2&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Oreilly の無料本を自動で入手する方法</title>
-      <link>http://mitakeck.github.io/oreilly-free-ebooks-dl/</link>
-      <pubDate>Mon, 06 Mar 2017 02:31:37 JST</pubDate>
-      <author>Alexander Ivanov</author>
-      <guid>http://mitakeck.github.io/oreilly-free-ebooks-dl/</guid>
-      <description>
-
-&lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;freebora&lt;/a&gt; という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
-Python で書かれており、ソースコードは Github で公開されている。&lt;br /&gt;
-電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h2 id=&#34;ソースコード探索&#34;&gt;ソースコード探索&lt;/h2&gt;
-
-&lt;p&gt;探索と言っても重要な部分は  &lt;a href=&#34;https://github.com/deeplook/freebora/blob/master/freebora/freebora.py&#34;&gt;&lt;code&gt;freebora/freebora/freebora.py&lt;/code&gt;&lt;/a&gt; 内にすべてまとまっていて、大まかに以下の流れで無料電子書籍を抽出/ダウンロードしていた。&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;1. &lt;code&gt;http://shop.oreilly.com/category/ebooks.do&lt;/code&gt; にアクセスしカテゴリ一覧を取得&lt;/li&gt;
-&lt;li&gt;2. &lt;code&gt;http://shop.oreilly.com/category/ebooks/[category].do&lt;/code&gt; にアクセスし電子書籍一覧を取得&lt;/li&gt;
-&lt;li&gt;3. 値段が &lt;code&gt;$0.00&lt;/code&gt; に設定されている電子書籍ページ URL を抽出&lt;/li&gt;
-&lt;li&gt;4. 対象電子書籍ページの URL を整形して、ダウンロード&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;処理 4. のダウンロード URL 整形処理に関してだけ補足。&lt;/p&gt;
-
-&lt;p&gt;以下に &lt;code&gt;freebora&lt;/code&gt; から抜粋したソースコードを掲載する。&lt;br /&gt;
-ソースコード内の &lt;code&gt;for&lt;/code&gt; 内部が処理 4 となる。
-重要なのは &lt;code&gt;re.sub()&lt;/code&gt; で、それぞれの URL を &lt;code&gt;.csp&lt;/code&gt; を &lt;code&gt;.pdf&lt;/code&gt; に&lt;code&gt;/free/&lt;/code&gt; を &lt;code&gt;/free/files/&lt;/code&gt; に置換する処理を行っている。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;...&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# https://github.com/deeplook/freebora/blob/master/freebora/freebora.py#L56-L73 より引用&lt;/span&gt;
-t2 &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; etree&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;parse(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://shop.oreilly.com&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; page_url, parser&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;p)
-xp &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;//span[@class=&amp;quot;price&amp;quot;][contains(., &amp;quot;$0.00&amp;quot;)]/&amp;#39;&lt;/span&gt;\
-     &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;../../../../div[@class=&amp;quot;thumbheader&amp;quot;]/a/@href&amp;#39;&lt;/span&gt;
-paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;xpath(xp)
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; j, path &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;enumerate&lt;/span&gt;(paths):
-    url &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://shop.oreilly.com&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; path
-    html &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; requests&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;get(url)&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;text
-    url_csps &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;findall(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;path_info\:\s+(.*?\.csp)&amp;#39;&lt;/span&gt;, html)
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;len&lt;/span&gt;(url_csps) &lt;span style=&#34;color: #555555&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;:
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;continue&lt;/span&gt;
-    url_csp &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; url_csps[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]
-    url_csp &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;\?.*&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, url_csp)
-    url_pdf &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;\.csp&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;.pdf&amp;#39;&lt;/span&gt;, url_csp)
-    url_pdf &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;/free/&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;/free/files/&amp;#39;&lt;/span&gt;, url_pdf)
-    u &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://www.oreilly.com/&lt;/span&gt;&lt;span style=&#34;color: #AA0000&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;%&lt;/span&gt; url_pdf
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; verbose:
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(u)
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;yield&lt;/span&gt; u
-&lt;span style=&#34;color: #555555&#34;&gt;...&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;実際の無料電子書籍 URL から手動で上記処理 4 を実行してみる。&lt;/p&gt;
-
-&lt;p&gt;下記 URL は『Guidelines for Keeping Pace with Innovation and Tech Adoption』という電子書籍のページ。こいつに対してさっきの置換処理を実行する。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;oreilly1.png&#34; alt=&#34;oreilly1.png&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;oreilly2.png&#34; alt=&#34;oreilly2.png&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;気づき&#34;&gt;気づき&lt;/h2&gt;
-
-&lt;h3 id=&#34;1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い&#34;&gt;1.&lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt;からスクレイプしたほうが早い&lt;/h3&gt;
-
-&lt;p&gt;freedora は &lt;code&gt;http://shop.oreilly.com/category/ebooks/[category].do&lt;/code&gt; から無料になっている電子書籍を探していたが、実は Oreilly さんが無料本に関しては &lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt; にまとめてくれている。
-なのでそちらからスクレイピングしたほうが処理としてはスマートになりそう。&lt;/p&gt;
-
-&lt;p&gt;ちなみにカテゴリは以下のものがあります&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;category &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;business&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;data&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;iot&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;design&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;programming&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;security&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;web-platform&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;webops&amp;quot;&lt;/span&gt;}
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id=&#34;2-pdf-以外のフォーマットもダウンロードできる&#34;&gt;2. PDF 以外のフォーマットもダウンロードできる&lt;/h3&gt;
-
-&lt;p&gt;freedora では PDF 形式の電子書籍をダウンロードしてくるのだが、
-&lt;code&gt;.pdf&lt;/code&gt; 以外にも &lt;code&gt;.epub&lt;/code&gt;, &lt;code&gt;.mobi&lt;/code&gt; フォーマットの存在を確認した。&lt;/p&gt;
-
-&lt;p&gt;Kindle Paper で電子書籍を読んでいると &lt;code&gt;.pdf&lt;/code&gt; より &lt;code&gt;.mobi&lt;/code&gt; のほうが扱いが良かったりするので、必要に合わせてフォーマットを指定すると良さげ。&lt;/p&gt;
-
-&lt;h2 id=&#34;参考-url-等&#34;&gt;参考 URL 等&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;https://github.com/deeplook/freebora&lt;/a&gt; : Download free ebooks from O&amp;rsquo;Reilly.&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>hugo test</title>
-      <link>http://mitakeck.github.io/page/</link>
-      <pubDate>Mon, 06 Mar 2017 00:38:19 JST</pubDate>
-      <author>Alexander Ivanov</author>
-      <guid>http://mitakeck.github.io/page/</guid>
-      <description>
-
-&lt;h1 id=&#34;hugo-のテスト&#34;&gt;hugo のテスト&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;シンタックスハイライトとか&lt;/li&gt;
-&lt;/ul&gt;
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg
-
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg
-
-% curl -Lso-  http://www.asahi.com/articles/ASHD96K3YHD9UTIL04L.html | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://www.asahicom.jp/articles/images/AS20151209004367_comm.jpg
-
-% curl -Lso- http://www.cnn.co.jp/world/35074672.html  | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;              
-# =&gt; http://www.cnn.co.jp/storage/2015/12/09/26290e751df22d92b3d72b36a65d95b3/france-russia-police-dog.jpg
-
-% curl -Lso-  http://ggsoku.com/2015/12/minecraft-for-wii-u-released-1217/ | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://ggsoku.com/index.php?aam_media=101921&amp;size=original
-
-%
 </description>
     </item>
     
