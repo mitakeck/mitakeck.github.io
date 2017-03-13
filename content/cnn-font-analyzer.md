@@ -1,6 +1,6 @@
 +++
 date = "2017-03-12T14:45:51+09:00"
-title = "文字画像からフォントを推定する"
+title = "[WIP] 文字画像からフォントを推定する"
 Categories = []
 Tags = ["machine learning", " Conventional Neural Network", "keras", "python"]
 Description = "吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。"
@@ -9,7 +9,7 @@ Description = "吊り広告や看板に使われているフォントどうい�
 
 # 文字画像からフォントを推定したい
 
-吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。
+吊り広告や看板に使われているフォントがどういうフォントなのか気になるときがある。
 そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。
 それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。
 
@@ -332,6 +332,9 @@ plt.subplot(2, 1, 2)
 plt.barh(lefts, pred, tick_label=fonts, align="center")
 ```
 
+![predict.png](predict.png)
+
+
 
 ```python
 def predict(imagepath):
@@ -347,7 +350,54 @@ def predict(imagepath):
     return pred_index, fonts[pred_index]
 ```
 
-![predict.png](predict.png)
+```python
+data = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+
+acc = [[], [], [], [], [], [], [], [], [], []]
+incre = 1.0 / 260.0
+
+for font in fonts:
+    font_index = fonts.index(font)
+    acc[font_index] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    for d in data:
+        for i in xrange(10):
+            file = "../datasets/data/validation/" + font + "/" + d + "-091" + str(i) + ".png"
+            pred = predict(file)
+            acc[font_index][pred[0]] += incre
+
+```
+
+### 混合行列を描画する
+
+```python
+from matplotlib.pyplot import specgram
+from sklearn.metrics import confusion_matrix
+from sklearn.svm import LinearSVC
+from sklearn.utils import resample
+from matplotlib import pylab
+import numpy as np
+
+cm = acc
+name_list = ["andalemono", "arial", "futura", "gillsans", "helvetica", "impact", "opitma", "timenewroman", "trebuchetms", "verdana"]
+title = "Font Prediction"
+
+pylab.clf()
+pylab.matshow(cm, fignum=False, cmap='Blues', vmin=0, vmax=1)
+ax = pylab.axes()
+ax.set_xticks(range(len(name_list)))
+ax.set_xticklabels(name_list, rotation=90)
+ax.xaxis.set_ticks_position("bottom")
+ax.set_yticks(range(len(name_list)))
+ax.set_yticklabels(name_list)
+
+pylab.title(title)
+pylab.colorbar()
+pylab.grid(False)
+pylab.xlabel('Predict class')
+pylab.ylabel('True class')
+pylab.grid(False)
+pylab.show()
+```
 
 ![confusion_matrix.png](confusion_matrix.png)
 
@@ -355,5 +405,5 @@ def predict(imagepath):
 ## まとめ
 
 - ある程度精度は出るっぽいので、対象フォント数を増やしたい
-  - なぜか Helvetica の認識率だけ悪い
-- 実際にスマホアプリとかに埋め込みたい
+  - なぜか Helvetica の認識率だけ悪いのは気になる
+- 実際にフォント推定器をスマホアプリとかに埋め込みたい
