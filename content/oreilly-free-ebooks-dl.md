@@ -57,19 +57,19 @@ for j, path in enumerate(paths):
 
 下記 URL は『Guidelines for Keeping Pace with Innovation and Tech Adoption』という電子書籍のページ。こいつに対してさっきの置換処理を実行する。
 
-```
-http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
-```
-
 ![oreilly1.png](oreilly1.png)
 
+http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp に対して `.csp` を `.pdf` に`/free/` を `/free/files/` に置換する処理を施す。
 すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。
 
-```
-http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
-```
+![url.prg](url.png)
+
+アクセスしてみる。
 
 ![oreilly2.png](oreilly2.png)
+
+対象書籍の PDF を閲覧できた。
+
 
 ## 気づき
 
