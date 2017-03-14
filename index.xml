@@ -453,17 +453,18 @@ paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style
 
 &lt;p&gt;下記 URL は『Guidelines for Keeping Pace with Innovation and Tech Adoption』という電子書籍のページ。こいつに対してさっきの置換処理を実行する。&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp
-&lt;/code&gt;&lt;/pre&gt;
-
 &lt;p&gt;&lt;img src=&#34;oreilly1.png&#34; alt=&#34;oreilly1.png&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp&#34;&gt;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp&lt;/a&gt; に対して &lt;code&gt;.csp&lt;/code&gt; を &lt;code&gt;.pdf&lt;/code&gt; に&lt;code&gt;/free/&lt;/code&gt; を &lt;code&gt;/free/files/&lt;/code&gt; に置換する処理を施す。
+すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;http://www.oreilly.com/business/free/files/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.pdf
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;url.png&#34; alt=&#34;url.prg&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;アクセスしてみる。&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;oreilly2.png&#34; alt=&#34;oreilly2.png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;対象書籍の PDF を閲覧できた。&lt;/p&gt;
 
 &lt;h2 id=&#34;気づき&#34;&gt;気づき&lt;/h2&gt;
 
