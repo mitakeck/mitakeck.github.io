@@ -1,6 +1,6 @@
 +++
 date = "2017-03-12T14:45:51+09:00"
-title = "[WIP] 文字画像からフォントを推定する"
+title = "文字画像からフォントを推定する"
 Categories = []
 Tags = ["machine learning", " Conventional Neural Network", "keras", "python"]
 Description = "吊り広告や看板に使われているフォントどういうフォントなのか気になるときがある。そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。"
@@ -10,7 +10,9 @@ Description = "吊り広告や看板に使われているフォントどうい�
 # 文字画像からフォントを推定したい
 
 吊り広告や看板に使われているフォントがどういうフォントなのか気になるときがある。
+
 そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。
+
 それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。
 
 今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。
@@ -29,6 +31,7 @@ Description = "吊り広告や看板に使われているフォントどうい�
 ## 学習データの準備
 
 なにはともあれとりあえず学習データを用意する。
+
 今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。
 
 その際 ImageMagick を用いるとだいぶ楽ができる。
@@ -39,14 +42,19 @@ ImageMagick で指定フォントの文字画像を出力するには `font` と
 
  - `-font` にはフォントを指定
  - `label` には描画したい文字を指定
+ - `output` には出力先の画像ファイル名を指定
 
- あと出力される画像の見栄えの調節用オプションとして `background`, `fill`, `size`, `gravity` 等がある。
+ ```
+ $ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
+ ```
+
+あと出力される画像の見栄えの調節用オプションとして `background`, `fill`, `size`, `gravity` 等がある。
+
 詳しくは [ImageMagick v6 Examples --
  Text to Image Handling](http://www.imagemagick.org/Usage/text/) を参照のこと。
 
-```
-$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
-```
+
+
 
 例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。
 
@@ -54,7 +62,7 @@ $ convert -background white -fill black -size 64x64 -gravity center -font [font]
 $ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
 ```
 
-以下、a-z の画像を出力した例
+以下、a から z までの画像を出力した例
 
 ![futura-a.png](futura-a.png)
 
@@ -116,6 +124,11 @@ y
 z
 ```
 
+そして最後にディレクトリに配置する。
+
+- `train/` には学習用のデータを配置する
+- `validation` にはテスト用のデータを配置する。
+
 
 ```
 .
@@ -143,7 +156,20 @@ z
     `-- verdana
 ```
 
+識別器の構築には keras を用いるのだが、以下のようなディレクトリ構成にしておくと、
+keras 側でいろいろと自動で処理してくれる。
+非常に便利だ。
+
+
 ### 学習データのかさ増し
+
+学習用のデータを傾けたり位置をずらしたりした画像を大量に生成することで学習データをかさ増しする。
+
+ImageMagick でやれなくもないけど、Python のコードでかさ増しを行った。
+
+
+以下のコード片が回転処理と移動処理をランダムに行うコードである。
+いずれも OpenCV の python ラッパーの `cv2` を用いている。
 
 ```python
 def rotate(src):
@@ -162,6 +188,8 @@ def move(src):
     return cv2.warpAffine(src,M,(cols,rows))
 ```
 
+指定画像に対して上記回転と移動処理を施し保存する処理。
+
 ```python
 def make(imgs, pathToDataset, pathToDatasetSaved, n=100):
     for img in imgs:
@@ -177,6 +205,10 @@ def make(imgs, pathToDataset, pathToDatasetSaved, n=100):
 
 
 ### ImagerDataGenherator 作成
+
+画像データのバッチを生成するために Keras では [ImageDataGenerator](https://keras.io/ja/preprocessing/image/) という仕組みが用意されている。
+
+今回は白黒画像なので `color_mode` を `grayscale` にして、他クラス分類させたいので、`class_mode` に `categorical` を指定する。
 
 ```python
 img_width, img_height = 64, 64
@@ -203,6 +235,10 @@ validation_generator = datagen.flow_from_directory(
 
 ## 学習モデル作成
 
+次に NN の層を定義していく。
+
+Keras では `Sequential` モデルを最初に生成して、そいつに対して `.add()` メソッドを用いて層を追加していく形で NN を構築していく。
+
 ```python
 model = Sequential()
 model.add(Convolution2D(32, 3, 3, input_shape=(img_width, img_height, 1)))
@@ -225,6 +261,12 @@ model.add(Dense(10))
 model.add(Activation('sigmoid'))
 ```
 
+そしてモデルの学習の前に `compile()` メソッドを使って幾つかの設定を行う必要がある。
+
+- `loss` : 損失関数の設定
+- `optimizer` : 最適化手法の設定
+- `metrics` : 評価指標の設定
+
 ```python
 model.compile(loss='binary_crossentropy',
               optimizer='Adam',
@@ -235,6 +277,8 @@ model.compile(loss='binary_crossentropy',
 
 
 ## 学習
+
+いよいよモデルを学習させる。
 
 ```python
 # ハイパーパラメタ
@@ -294,15 +338,22 @@ print model.evaluate_generator(validation_generator, nb_validation_samples)
 # loss と accuracy の値が得られる
 ```
 
+`save_weights()` メソッドを用いて、モデルを保存しておく
+
 ```python
 # モデルを保存する
 model.save_weights('e300.h5')
 ```
 
+識別精度
 ![modelacc.png](modelacc.png)
+
+ロス
 ![modelloss.png](modelloss.png)
 
-## 実験
+## とりあえずモデルを使ってみる
+
+てきとうに画像を突っ込んでフォントを推定してみる
 
 ```python
 # 推定処理
@@ -334,7 +385,11 @@ plt.barh(lefts, pred, tick_label=fonts, align="center")
 
 ![predict.png](predict.png)
 
+いい感じ。
 
+### 混合行列を描画する
+
+さっきの予測処理を関数化する
 
 ```python
 def predict(imagepath):
@@ -349,6 +404,8 @@ def predict(imagepath):
     pred_index = np.argmax(pred)
     return pred_index, fonts[pred_index]
 ```
+
+テスト用データに対して予測処理をして、配列に格納する処理
 
 ```python
 data = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
@@ -367,7 +424,8 @@ for font in fonts:
 
 ```
 
-### 混合行列を描画する
+最後に混合行列を描画する。
+描画には `matplotlib` で行った。
 
 ```python
 from matplotlib.pyplot import specgram
@@ -400,7 +458,6 @@ pylab.show()
 ```
 
 ![confusion_matrix.png](confusion_matrix.png)
-
 
 ## まとめ
 
