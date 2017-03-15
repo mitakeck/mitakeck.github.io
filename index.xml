@@ -8,7 +8,7 @@
     <updated>2017-03-12 14:45:51 &#43;0900 JST</updated>
     
     <item>
-      <title>[WIP] 文字画像からフォントを推定する</title>
+      <title>文字画像からフォントを推定する</title>
       <link>http://mitakeck.github.io/cnn-font-analyzer/</link>
       <pubDate>Sun, 12 Mar 2017 14:45:51 JST</pubDate>
       <author>Alexander Ivanov</author>
@@ -17,9 +17,11 @@
 
 &lt;h1 id=&#34;文字画像からフォントを推定したい&#34;&gt;文字画像からフォントを推定したい&lt;/h1&gt;
 
-&lt;p&gt;吊り広告や看板に使われているフォントがどういうフォントなのか気になるときがある。
-そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。
-それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。&lt;/p&gt;
+&lt;p&gt;吊り広告や看板に使われているフォントがどういうフォントなのか気になるときがある。&lt;/p&gt;
+
+&lt;p&gt;そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。&lt;/p&gt;
+
+&lt;p&gt;それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。&lt;/p&gt;
 
 &lt;p&gt;今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。&lt;/p&gt;
 
@@ -44,8 +46,9 @@
 
 &lt;h2 id=&#34;学習データの準備&#34;&gt;学習データの準備&lt;/h2&gt;
 
-&lt;p&gt;なにはともあれとりあえず学習データを用意する。
-今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。&lt;/p&gt;
+&lt;p&gt;なにはともあれとりあえず学習データを用意する。&lt;/p&gt;
+
+&lt;p&gt;今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。&lt;/p&gt;
 
 &lt;p&gt;その際 ImageMagick を用いるとだいぶ楽ができる。&lt;/p&gt;
 
@@ -56,21 +59,23 @@
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;-font&lt;/code&gt; にはフォントを指定&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;label&lt;/code&gt; には描画したい文字を指定&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;output&lt;/code&gt; には出力先の画像ファイル名を指定&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;あと出力される画像の見栄えの調節用オプションとして &lt;code&gt;background&lt;/code&gt;, &lt;code&gt;fill&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, &lt;code&gt;gravity&lt;/code&gt; 等がある。
-詳しくは &lt;a href=&#34;http://www.imagemagick.org/Usage/text/&#34;&gt;ImageMagick v6 Examples &amp;ndash;
- Text to Image Handling&lt;/a&gt; を参照のこと。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
+&lt;pre&gt;&lt;code&gt; $ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
 &lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;あと出力される画像の見栄えの調節用オプションとして &lt;code&gt;background&lt;/code&gt;, &lt;code&gt;fill&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, &lt;code&gt;gravity&lt;/code&gt; 等がある。&lt;/p&gt;
+
+&lt;p&gt;詳しくは &lt;a href=&#34;http://www.imagemagick.org/Usage/text/&#34;&gt;ImageMagick v6 Examples &amp;ndash;
+ Text to Image Handling&lt;/a&gt; を参照のこと。&lt;/p&gt;
 
 &lt;p&gt;例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;以下、a-z の画像を出力した例&lt;/p&gt;
+&lt;p&gt;以下、a から z までの画像を出力した例&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;futura-a.png&#34; alt=&#34;futura-a.png&#34; /&gt;&lt;/p&gt;
 
@@ -130,6 +135,13 @@ y
 z
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;そして最後にディレクトリに配置する。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;train/&lt;/code&gt; には学習用のデータを配置する&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;validation&lt;/code&gt; にはテスト用のデータを配置する。&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;pre&gt;&lt;code&gt;.
 |-- train
 |   |-- andalemono
@@ -155,7 +167,18 @@ z
     `-- verdana
 &lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;識別器の構築には keras を用いるのだが、以下のようなディレクトリ構成にしておくと、
+keras 側でいろいろと自動で処理してくれる。
+非常に便利だ。&lt;/p&gt;
+
 &lt;h3 id=&#34;学習データのかさ増し&#34;&gt;学習データのかさ増し&lt;/h3&gt;
+
+&lt;p&gt;学習用のデータを傾けたり位置をずらしたりした画像を大量に生成することで学習データをかさ増しする。&lt;/p&gt;
+
+&lt;p&gt;ImageMagick でやれなくもないけど、Python のコードでかさ増しを行った。&lt;/p&gt;
+
+&lt;p&gt;以下のコード片が回転処理と移動処理をランダムに行うコードである。
+いずれも OpenCV の python ラッパーの &lt;code&gt;cv2&lt;/code&gt; を用いている。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;rotate&lt;/span&gt;(src):
     rows,cols &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; src&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;shape
     r &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;360&lt;/span&gt;)
@@ -171,6 +194,8 @@ z
 
     &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;warpAffine(src,M,(cols,rows))
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;指定画像に対して上記回転と移動処理を施し保存する処理。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;make&lt;/span&gt;(imgs, pathToDataset, pathToDatasetSaved, n&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;100&lt;/span&gt;):
     &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; img &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; imgs:
         &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; img&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;find(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.png&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; :
@@ -184,6 +209,10 @@ z
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h3 id=&#34;imagerdatagenherator-作成&#34;&gt;ImagerDataGenherator 作成&lt;/h3&gt;
+
+&lt;p&gt;画像データのバッチを生成するために Keras では &lt;a href=&#34;https://keras.io/ja/preprocessing/image/&#34;&gt;ImageDataGenerator&lt;/a&gt; という仕組みが用意されている。&lt;/p&gt;
+
+&lt;p&gt;今回は白黒画像なので &lt;code&gt;color_mode&lt;/code&gt; を &lt;code&gt;grayscale&lt;/code&gt; にして、他クラス分類させたいので、&lt;code&gt;class_mode&lt;/code&gt; に &lt;code&gt;categorical&lt;/code&gt; を指定する。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;img_width, img_height &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;
 
 train_data_dir &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;../datasets/data/train&amp;quot;&lt;/span&gt;
@@ -207,6 +236,10 @@ validation_generator &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; d
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id=&#34;学習モデル作成&#34;&gt;学習モデル作成&lt;/h2&gt;
+
+&lt;p&gt;次に NN の層を定義していく。&lt;/p&gt;
+
+&lt;p&gt;Keras では &lt;code&gt;Sequential&lt;/code&gt; モデルを最初に生成して、そいつに対して &lt;code&gt;.add()&lt;/code&gt; メソッドを用いて層を追加していく形で NN を構築していく。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;model &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; Sequential()
 model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color: #FF6600&#34;&gt;32&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, input_shape&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_width, img_height, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)))
 model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
@@ -227,6 +260,14 @@ model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Dropout(&lt;sp
 model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Dense(&lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;))
 model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;sigmoid&amp;#39;&lt;/span&gt;))
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;そしてモデルの学習の前に &lt;code&gt;compile()&lt;/code&gt; メソッドを使って幾つかの設定を行う必要がある。&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;loss&lt;/code&gt; : 損失関数の設定&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;optimizer&lt;/code&gt; : 最適化手法の設定&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;metrics&lt;/code&gt; : 評価指標の設定&lt;/li&gt;
+&lt;/ul&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;compile(loss&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;binary_crossentropy&amp;#39;&lt;/span&gt;,
               optimizer&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Adam&amp;#39;&lt;/span&gt;,
               metrics&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;accuracy&amp;#39;&lt;/span&gt;])
@@ -235,6 +276,8 @@ model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt
 &lt;!-- ![model.png](model.png) --&gt;
 
 &lt;h2 id=&#34;学習&#34;&gt;学習&lt;/h2&gt;
+
+&lt;p&gt;いよいよモデルを学習させる。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# ハイパーパラメタ&lt;/span&gt;
 nb_epoch &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;300&lt;/span&gt;
 nb_train_samples &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;2048&lt;/span&gt;
@@ -286,14 +329,21 @@ Epoch 300/300
 &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# [0.068484609230206564, 0.9645432738157419]&lt;/span&gt;
 &lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# loss と accuracy の値が得られる&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code&gt;save_weights()&lt;/code&gt; メソッドを用いて、モデルを保存しておく&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# モデルを保存する&lt;/span&gt;
 model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;save_weights(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;e300.h5&amp;#39;&lt;/span&gt;)
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;&lt;img src=&#34;modelacc.png&#34; alt=&#34;modelacc.png&#34; /&gt;
+&lt;p&gt;識別精度
+&lt;img src=&#34;modelacc.png&#34; alt=&#34;modelacc.png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;ロス
 &lt;img src=&#34;modelloss.png&#34; alt=&#34;modelloss.png&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;実験&#34;&gt;実験&lt;/h2&gt;
+&lt;h2 id=&#34;とりあえずモデルを使ってみる&#34;&gt;とりあえずモデルを使ってみる&lt;/h2&gt;
+
+&lt;p&gt;てきとうに画像を突っ込んでフォントを推定してみる&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# 推定処理&lt;/span&gt;
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;keras.preprocessing&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; image
 fonts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
@@ -322,6 +372,12 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, ti
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;いい感じ。&lt;/p&gt;
+
+&lt;h3 id=&#34;混合行列を描画する&#34;&gt;混合行列を描画する&lt;/h3&gt;
+
+&lt;p&gt;さっきの予測処理を関数化する&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;predict&lt;/span&gt;(imagepath):
     fonts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
     img &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;)
@@ -334,6 +390,8 @@ plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, ti
     pred_index &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;argmax(pred)
     &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; pred_index, fonts[pred_index]
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;テスト用データに対して予測処理をして、配列に格納する処理&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;a&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;b&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;c&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;d&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;e&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;f&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;g&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;h&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;i&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;j&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;l&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;m&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;o&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;q&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;r&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;t&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;u&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;w&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;x&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;y&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;z&amp;quot;&lt;/span&gt;]
 
 acc &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [[], [], [], [], [], [], [], [], [], []]
@@ -349,7 +407,8 @@ incre &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&
             acc[font_index][pred[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]] &lt;span style=&#34;color: #555555&#34;&gt;+=&lt;/span&gt; incre
 &lt;/pre&gt;&lt;/div&gt;
 
-&lt;h3 id=&#34;混合行列を描画する&#34;&gt;混合行列を描画する&lt;/h3&gt;
+&lt;p&gt;最後に混合行列を描画する。
+描画には &lt;code&gt;matplotlib&lt;/code&gt; で行った。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; specgram
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.metrics&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; confusion_matrix
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.svm&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; LinearSVC
