@@ -16,8 +16,16 @@
       <description>
 
 &lt;h1 id=&#34;text-to-speech-api-使ってみる&#34;&gt;Text-to-Speech API 使ってみる&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;使用するライブラリ群&lt;/li&gt;
+&lt;/ul&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;http.client&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;urllib.parse&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;json&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;アクセストークンを取得する&lt;/li&gt;
+&lt;/ul&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;subscription_key &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt; サブスクリプションキー &amp;gt;&amp;quot;&lt;/span&gt;
 headers &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {
     &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-type&amp;quot;&lt;/span&gt;:              &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;application/x-www-form-urlencoded&amp;quot;&lt;/span&gt;,
@@ -38,6 +46,10 @@ conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
 access_token &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; data&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;decode(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;)
 &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt; (&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Access Token: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; access_token)
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+&lt;li&gt;音声データを作成する&lt;/li&gt;
+&lt;/ul&gt;
 &lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;text &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;日本語しゃべります&amp;quot;&lt;/span&gt;
 body &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;speak version=&amp;#39;1.0&amp;#39; xml:lang=&amp;#39;en-us&amp;#39;&amp;gt;&amp;lt;voice xml:lang=&amp;#39;ja-jp&amp;#39; xml:gender=&amp;#39;Female&amp;#39; name=&amp;#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&amp;#39;&amp;gt;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;/voice&amp;gt;&amp;lt;/speak&amp;gt;&amp;quot;&lt;/span&gt;
 
@@ -61,6 +73,41 @@ wav &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#3
 wav&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;write(data)
 wav&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
 &lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;声色は何種類か用意されていて、日本語は男性声と女性声と 2 種類ある&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ar-EG*	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)&amp;quot;
+de-DE	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)&amp;quot;
+de-DE	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (de-DE, Stefan, Apollo)&amp;quot;
+en-AU	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)&amp;quot;
+en-CA	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-CA, Linda)&amp;quot;
+en-GB	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)&amp;quot;
+en-GB	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-GB, George, Apollo)&amp;quot;
+en-IN	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-IN, Ravi, Apollo)&amp;quot;
+en-US	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)&amp;quot;
+en-US	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)&amp;quot;
+es-ES	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)&amp;quot;
+es-ES	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (es-ES, Pablo, Apollo)&amp;quot;
+es-MX	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (es-MX, Raul, Apollo)&amp;quot;
+fr-CA	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)&amp;quot;
+fr-FR	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)&amp;quot;
+fr-FR	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (fr-FR, Paul, Apollo)&amp;quot;
+hi-IN	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (hi-IN, Kalpana, Apollo)&amp;quot;
+it-IT	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (it-IT, Cosimo, Apollo)&amp;quot;
+ja-JP	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&amp;quot;
+ja-JP	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (ja-JP, Ichiro, Apollo)&amp;quot;
+ko-KR	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (ko-KR,HeamiRUS)&amp;quot;
+pt-BR	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (pt-BR, Daniel, Apollo)&amp;quot;
+ru-RU	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)&amp;quot;
+ru-RU	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (ru-RU, Pavel, Apollo)&amp;quot;
+zh-CN	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)&amp;quot;
+zh-CN	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)&amp;quot;
+zh-CN	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)&amp;quot;
+zh-HK	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)&amp;quot;
+zh-HK	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-HK, Danny, Apollo)&amp;quot;
+zh-TW	Female	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)&amp;quot;
+zh-TW	Male	&amp;quot;Microsoft Server Speech Text to Speech Voice (zh-TW, Zhiwei, Apollo)&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;参照リンク&#34;&gt;参照リンク&lt;/h2&gt;
 
