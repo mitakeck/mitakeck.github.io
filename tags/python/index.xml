@@ -2,10 +2,75 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
       <title>Python on mitakeck.github.io </title>
-    <link>http://mitakeck.github.io/tags/python/index.xml</link>
+    <link>http://mitakeck.github.io/tags/python/</link>
     <language>en-us</language>
     <author>Alexander Ivanov</author>
-    <updated>0001-01-01 00:00:00 &#43;0000 UTC</updated>
+    <updated>2017-04-30 16:40:01 &#43;0900 JST</updated>
+    
+    <item>
+      <title>Text-to-Speech API 使ってみる</title>
+      <link>http://mitakeck.github.io/bing-test-to-speech-api/</link>
+      <pubDate>Sun, 30 Apr 2017 16:40:01 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/bing-test-to-speech-api/</guid>
+      <description>
+
+&lt;h1 id=&#34;text-to-speech-api-使ってみる&#34;&gt;Text-to-Speech API 使ってみる&lt;/h1&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;http.client&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;urllib.parse&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;json&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;subscription_key &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt; サブスクリプションキー &amp;gt;&amp;quot;&lt;/span&gt;
+headers &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {
+    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-type&amp;quot;&lt;/span&gt;:              &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;application/x-www-form-urlencoded&amp;quot;&lt;/span&gt;,
+    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Ocp-Apim-Subscription-Key&amp;quot;&lt;/span&gt;: subscription_key
+}
+access_token_host &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;api.cognitive.microsoft.com&amp;quot;&lt;/span&gt;
+path &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/sts/v1.0/issueToken&amp;quot;&lt;/span&gt;
+
+conn &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; http&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;HTTPSConnection(access_token_host)
+conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;request(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;POST&amp;quot;&lt;/span&gt;, path, params, headers)
+response &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;getresponse()
+
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;status, response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;reason)
+
+data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;read()
+conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
+
+access_token &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; data&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;decode(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;)
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt; (&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Access Token: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; access_token)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;text &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;日本語しゃべります&amp;quot;&lt;/span&gt;
+body &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;speak version=&amp;#39;1.0&amp;#39; xml:lang=&amp;#39;en-us&amp;#39;&amp;gt;&amp;lt;voice xml:lang=&amp;#39;ja-jp&amp;#39; xml:gender=&amp;#39;Female&amp;#39; name=&amp;#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&amp;#39;&amp;gt;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;/voice&amp;gt;&amp;lt;/speak&amp;gt;&amp;quot;&lt;/span&gt;
+
+headers &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {
+    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-type&amp;quot;&lt;/span&gt;:             &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;application/ssml+xml&amp;quot;&lt;/span&gt;,
+    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;X-Microsoft-OutputFormat&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;riff-16khz-16bit-mono-pcm&amp;quot;&lt;/span&gt;,
+    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;:            &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Bearer &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; access_token,
+    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;User-Agent&amp;quot;&lt;/span&gt;:               &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Meriken&amp;quot;&lt;/span&gt;
+}
+
+&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# https://speech.platform.bing.com/synthesize&lt;/span&gt;
+conn &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; http&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;HTTPSConnection(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;speech.platform.bing.com&amp;quot;&lt;/span&gt;)
+conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;request(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;POST&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/synthesize&amp;quot;&lt;/span&gt;, body&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;utf-8&amp;#39;&lt;/span&gt;), headers)
+response &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;getresponse()
+&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;status, response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;reason)
+
+data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;read()
+conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
+
+wav &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;download-&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.wav&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;wb&amp;quot;&lt;/span&gt;)
+wav&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;write(data)
+wav&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&#34;参照リンク&#34;&gt;参照リンク&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput&#34;&gt;https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript&#34;&gt;https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f&#34;&gt;https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
     
     <item>
       <title>文字画像からフォントを推定する</title>

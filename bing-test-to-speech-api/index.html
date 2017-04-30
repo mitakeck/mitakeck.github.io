@@ -1,0 +1,136 @@
+	
+	<!doctype html>
+<html lang="en">
+  <head>
+    <title>mitakeck - Text-to-Speech API 使ってみる</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+    
+    <link href="/css/milk.min.css" rel="stylesheet">
+    <link href="/css/milk-responsive.min.css" rel="stylesheet">     
+    <link href="/css/style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="/css/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link rel="shortcut icon" href="/images/alexfinn.ico">
+    <link rel="apple-touch-icon" href="">
+    <link rel="canonical" href="http://mitakeck.github.io/bing-test-to-speech-api/">
+
+    
+    <link href="/rss.xml" type="application/atom+xml" rel="alternate" title="mitakeck.github.io">
+
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">        
+  <div id="navbar-inner">
+          <div id="logo">
+            <a href="http://mitakeck.github.io"><img src="/images/letter-a.png" width="100px"></img></a>
+          </div>
+  </div>
+</div>
+
+
+<div class="container">
+  <div class="content">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="posts">
+
+	    
+	  <div class="post">
+	    <header class="post-header">
+	        <h1><a href="/bing-test-to-speech-api/">Text-to-Speech API 使ってみる</a></h1>
+	        <div class="post-time">April 30 2017</div>
+	    </header>
+	    <div class="post-after">
+	        <div class="tags">
+	            
+	                <a href="http://mitakeck.github.io/tags/python">python</a>              
+	            
+	                <a href="http://mitakeck.github.io/tags/azure">Azure</a>              
+	            
+	        </div>
+	    </div>
+	    <hr>
+	    <div class="post content">
+	        
+
+<h1 id="text-to-speech-api-使ってみる">Text-to-Speech API 使ってみる</h1>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">http.client</span><span style="color: #555555">,</span> <span style="color: #00CCFF; font-weight: bold">urllib.parse</span><span style="color: #555555">,</span> <span style="color: #00CCFF; font-weight: bold">json</span>
+</pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>subscription_key <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&lt; サブスクリプションキー &gt;&quot;</span>
+headers <span style="color: #555555">=</span> {
+    <span style="color: #CC3300">&quot;Content-type&quot;</span>:              <span style="color: #CC3300">&quot;application/x-www-form-urlencoded&quot;</span>,
+    <span style="color: #CC3300">&quot;Ocp-Apim-Subscription-Key&quot;</span>: subscription_key
+}
+access_token_host <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;api.cognitive.microsoft.com&quot;</span>
+path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/sts/v1.0/issueToken&quot;</span>
+
+conn <span style="color: #555555">=</span> http<span style="color: #555555">.</span>client<span style="color: #555555">.</span>HTTPSConnection(access_token_host)
+conn<span style="color: #555555">.</span>request(<span style="color: #CC3300">&quot;POST&quot;</span>, path, params, headers)
+response <span style="color: #555555">=</span> conn<span style="color: #555555">.</span>getresponse()
+
+<span style="color: #006699; font-weight: bold">print</span>(response<span style="color: #555555">.</span>status, response<span style="color: #555555">.</span>reason)
+
+data <span style="color: #555555">=</span> response<span style="color: #555555">.</span>read()
+conn<span style="color: #555555">.</span>close()
+
+access_token <span style="color: #555555">=</span> data<span style="color: #555555">.</span>decode(<span style="color: #CC3300">&quot;UTF-8&quot;</span>)
+<span style="color: #006699; font-weight: bold">print</span> (<span style="color: #CC3300">&quot;Access Token: &quot;</span> <span style="color: #555555">+</span> access_token)
+</pre></div>
+<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>text <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;日本語しゃべります&quot;</span>
+body <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&lt;speak version=&#39;1.0&#39; xml:lang=&#39;en-us&#39;&gt;&lt;voice xml:lang=&#39;ja-jp&#39; xml:gender=&#39;Female&#39; name=&#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&#39;&gt;&quot;</span> <span style="color: #555555">+</span> text <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;&lt;/voice&gt;&lt;/speak&gt;&quot;</span>
+
+headers <span style="color: #555555">=</span> {
+    <span style="color: #CC3300">&quot;Content-type&quot;</span>:             <span style="color: #CC3300">&quot;application/ssml+xml&quot;</span>,
+    <span style="color: #CC3300">&quot;X-Microsoft-OutputFormat&quot;</span>: <span style="color: #CC3300">&quot;riff-16khz-16bit-mono-pcm&quot;</span>,
+    <span style="color: #CC3300">&quot;Authorization&quot;</span>:            <span style="color: #CC3300">&quot;Bearer &quot;</span> <span style="color: #555555">+</span> access_token,
+    <span style="color: #CC3300">&quot;User-Agent&quot;</span>:               <span style="color: #CC3300">&quot;Meriken&quot;</span>
+}
+
+<span style="color: #0099FF; font-style: italic"># https://speech.platform.bing.com/synthesize</span>
+conn <span style="color: #555555">=</span> http<span style="color: #555555">.</span>client<span style="color: #555555">.</span>HTTPSConnection(<span style="color: #CC3300">&quot;speech.platform.bing.com&quot;</span>)
+conn<span style="color: #555555">.</span>request(<span style="color: #CC3300">&quot;POST&quot;</span>, <span style="color: #CC3300">&quot;/synthesize&quot;</span>, body<span style="color: #555555">.</span>encode(<span style="color: #CC3300">&#39;utf-8&#39;</span>), headers)
+response <span style="color: #555555">=</span> conn<span style="color: #555555">.</span>getresponse()
+<span style="color: #006699; font-weight: bold">print</span>(response<span style="color: #555555">.</span>status, response<span style="color: #555555">.</span>reason)
+
+data <span style="color: #555555">=</span> response<span style="color: #555555">.</span>read()
+conn<span style="color: #555555">.</span>close()
+
+wav <span style="color: #555555">=</span> <span style="color: #336666">open</span>(<span style="color: #CC3300">&quot;download-&quot;</span> <span style="color: #555555">+</span> text <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;.wav&quot;</span>, <span style="color: #CC3300">&quot;wb&quot;</span>)
+wav<span style="color: #555555">.</span>write(data)
+wav<span style="color: #555555">.</span>close()
+</pre></div>
+
+<h2 id="参照リンク">参照リンク</h2>
+
+<ul>
+<li><a href="https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput">https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput</a></li>
+<li><a href="https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript">https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript</a></li>
+<li><a href="https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f">https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f</a></li>
+</ul>
+
+	    </div>
+	    
+	<div class="about">
+	<p> 
+     
+    </p>
+</div>
+		<nav id="pagination">
+			
+			<a class="next" href="http://mitakeck.github.io/cnn-font-analyzer/">Next</a>
+		</nav>
+	
+		        <footer>
+		        	Built with <a href="https://github.com/spf13/hugo">Hugo</a>
+		        	<p>© mitakeck 2017</p>
+		        </footer>
+		    </div>
+		  </div>
+		</div>
+      </div>
+    </div>
+</body>
+
+</html>
+

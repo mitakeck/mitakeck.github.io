@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Tags on mitakeck.github.io </title>
+    <link>http://mitakeck.github.io/tags/</link>
+    <language>en-us</language>
+    <author>Alexander Ivanov</author>
+    <updated>2017-04-30 16:40:01 &#43;0900 JST</updated>
+    
+    <item>
+      <title>Azure</title>
+      <link>http://mitakeck.github.io/tags/azure/</link>
+      <pubDate>Sun, 30 Apr 2017 16:40:01 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/azure/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Conventional Neural Network</title>
+      <link>http://mitakeck.github.io/tags/conventional-neural-network/</link>
+      <pubDate>Sun, 12 Mar 2017 14:45:51 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/conventional-neural-network/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Ebook</title>
+      <link>http://mitakeck.github.io/tags/ebook/</link>
+      <pubDate>Mon, 06 Mar 2017 02:31:37 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/ebook/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Keras</title>
+      <link>http://mitakeck.github.io/tags/keras/</link>
+      <pubDate>Sun, 12 Mar 2017 14:45:51 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/keras/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Machine Learning</title>
+      <link>http://mitakeck.github.io/tags/machine-learning/</link>
+      <pubDate>Sun, 12 Mar 2017 14:45:51 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/machine-learning/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Oreilly</title>
+      <link>http://mitakeck.github.io/tags/oreilly/</link>
+      <pubDate>Mon, 06 Mar 2017 02:31:37 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/oreilly/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Python</title>
+      <link>http://mitakeck.github.io/tags/python/</link>
+      <pubDate>Sun, 30 Apr 2017 16:40:01 JST</pubDate>
+      <author>Alexander Ivanov</author>
+      <guid>http://mitakeck.github.io/tags/python/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

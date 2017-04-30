@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>http://mitakeck.github.io/bing-test-to-speech-api/</loc>
+    <lastmod>2017-04-30T16:40:01+09:00</lastmod>
+  </url>
   
   <url>
     <loc>http://mitakeck.github.io/cnn-font-analyzer/</loc>
@@ -14,6 +20,17 @@
   <url>
     <loc>http://mitakeck.github.io/page/</loc>
     <lastmod>2017-03-06T00:38:19+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://mitakeck.github.io/tags/azure/</loc>
+    <lastmod>2017-04-30T16:40:01+09:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://mitakeck.github.io/categories/</loc>
+    <priority>0</priority>
   </url>
   
   <url>
@@ -48,18 +65,19 @@
   
   <url>
     <loc>http://mitakeck.github.io/tags/python/</loc>
-    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
+    <lastmod>2017-04-30T16:40:01+09:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://mitakeck.github.io/tags/</loc>
+    <lastmod>2017-04-30T16:40:01+09:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://mitakeck.github.io/</loc>
-    <lastmod>2017-03-12T14:45:51+09:00</lastmod>
+    <lastmod>2017-04-30T16:40:01+09:00</lastmod>
     <priority>0</priority>
   </url>
   
