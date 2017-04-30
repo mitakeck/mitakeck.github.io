@@ -56,15 +56,22 @@
 
 <h1 id="text-to-speech-api-使ってみる">Text-to-Speech API 使ってみる</h1>
 
-<ul>
-<li>使用するライブラリ群</li>
-</ul>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">http.client</span><span style="color: #555555">,</span> <span style="color: #00CCFF; font-weight: bold">urllib.parse</span><span style="color: #555555">,</span> <span style="color: #00CCFF; font-weight: bold">json</span>
-</pre></div>
+<h2 id="概要">概要</h2>
 
-<ul>
-<li>アクセストークンを取得する</li>
-</ul>
+<p>基本的には <a href="https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput">Microsoft の Cognitive Services の API リファレンス</a> に従って API を叩けばできるが、音声データ作成処理に手間取ったりしたのでメモ書きとして残しておく</p>
+
+<p>Cognitive Service を Python から叩くことを想定している</p>
+
+<p>一連の流れをまとめたファイルは以下から閲覧できる
+<a href="https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f">https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f</a></p>
+
+<h2 id="アクセストークンを取得する">アクセストークンを取得する</h2>
+
+<p>なんか知らないけど、Cognitive Searvice のサブスクリプションキーを Azure で発行した後に、アクセストークンを取得しないといけないらしい</p>
+
+<p>Header に <code>Ocp-Apim-Subscription-Key</code> をキーとして、サブスクリプションキーを挿入して <code>https://api.cognitive.microsoft.com/sts/v1.0/issueToken</code> へ　POST すると返却値にアクセストークンが渡ってくる</p>
+
+<p>ここで取得したアクセストークンは音声データを作成する際に使いまわすものになる</p>
 <div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>subscription_key <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&lt; サブスクリプションキー &gt;&quot;</span>
 headers <span style="color: #555555">=</span> {
     <span style="color: #CC3300">&quot;Content-type&quot;</span>:              <span style="color: #CC3300">&quot;application/x-www-form-urlencoded&quot;</span>,
@@ -86,9 +93,13 @@ access_token <span style="color: #555555">=</span> data<span style="color: #5555
 <span style="color: #006699; font-weight: bold">print</span> (<span style="color: #CC3300">&quot;Access Token: &quot;</span> <span style="color: #555555">+</span> access_token)
 </pre></div>
 
-<ul>
-<li>音声データを作成する</li>
-</ul>
+<h2 id="音声データを作成する">音声データを作成する</h2>
+
+<p>音声データを作成するには <code>https://speech.platform.bing.com/synthesize</code> にデータを投げれば良い</p>
+
+<p>上記のエンドポイントに対して喋らせる内容や声色はリクエストの POST クエリパラメータに <a href="https://www.w3.org/TR/speech-synthesis/">SSML 形式</a> で入れて、アクセストークンや音声ファイルの形式なんかはリクエストの Header に入れればおｋ</p>
+
+<p>プログラム中では日本語のテキストデータを与えると、発声データが wav ファイルとしてレスポンスデータに乗っかってくるので、ファイルとして書き出して保存する処理をしている</p>
 <div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>text <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;日本語しゃべります&quot;</span>
 body <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&lt;speak version=&#39;1.0&#39; xml:lang=&#39;en-us&#39;&gt;&lt;voice xml:lang=&#39;ja-jp&#39; xml:gender=&#39;Female&#39; name=&#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&#39;&gt;&quot;</span> <span style="color: #555555">+</span> text <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;&lt;/voice&gt;&lt;/speak&gt;&quot;</span>
 
@@ -113,40 +124,86 @@ wav<span style="color: #555555">.</span>write(data)
 wav<span style="color: #555555">.</span>close()
 </pre></div>
 
+<p>実際に作成された wav ファイルがこれ</p>
+
+<p><audio controls="" width="250px" height="150px">
+    <!-- <source src="sample.mp3" type="audio/mp3"> -->
+    <source src="sound1.wav" type="audio/wav">
+    <embed src="sound1.wav" type="audio/wav" width="240" height="50" autostart="false" controller="true" loop="false" pluginspage="http://www.apple.com/jp/quicktime/download/">
+</audio></p>
+
+<h2 id="声色を変えてみる">声色を変えてみる</h2>
+
 <p>声色は何種類か用意されていて、日本語は男性声と女性声と 2 種類ある</p>
 
-<pre><code>ar-EG*	Female	&quot;Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)&quot;
-de-DE	Female	&quot;Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)&quot;
-de-DE	Male	&quot;Microsoft Server Speech Text to Speech Voice (de-DE, Stefan, Apollo)&quot;
-en-AU	Female	&quot;Microsoft Server Speech Text to Speech Voice (en-AU, Catherine)&quot;
-en-CA	Female	&quot;Microsoft Server Speech Text to Speech Voice (en-CA, Linda)&quot;
-en-GB	Female	&quot;Microsoft Server Speech Text to Speech Voice (en-GB, Susan, Apollo)&quot;
-en-GB	Male	&quot;Microsoft Server Speech Text to Speech Voice (en-GB, George, Apollo)&quot;
-en-IN	Male	&quot;Microsoft Server Speech Text to Speech Voice (en-IN, Ravi, Apollo)&quot;
-en-US	Female	&quot;Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)&quot;
-en-US	Male	&quot;Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)&quot;
-es-ES	Female	&quot;Microsoft Server Speech Text to Speech Voice (es-ES, Laura, Apollo)&quot;
-es-ES	Male	&quot;Microsoft Server Speech Text to Speech Voice (es-ES, Pablo, Apollo)&quot;
-es-MX	Male	&quot;Microsoft Server Speech Text to Speech Voice (es-MX, Raul, Apollo)&quot;
-fr-CA	Female	&quot;Microsoft Server Speech Text to Speech Voice (fr-CA, Caroline)&quot;
-fr-FR	Female	&quot;Microsoft Server Speech Text to Speech Voice (fr-FR, Julie, Apollo)&quot;
-fr-FR	Male	&quot;Microsoft Server Speech Text to Speech Voice (fr-FR, Paul, Apollo)&quot;
-hi-IN	Female	&quot;Microsoft Server Speech Text to Speech Voice (hi-IN, Kalpana, Apollo)&quot;
-it-IT	Male	&quot;Microsoft Server Speech Text to Speech Voice (it-IT, Cosimo, Apollo)&quot;
-ja-JP	Female	&quot;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&quot;
-ja-JP	Male	&quot;Microsoft Server Speech Text to Speech Voice (ja-JP, Ichiro, Apollo)&quot;
-ko-KR	Female	&quot;Microsoft Server Speech Text to Speech Voice (ko-KR,HeamiRUS)&quot;
-pt-BR	Male	&quot;Microsoft Server Speech Text to Speech Voice (pt-BR, Daniel, Apollo)&quot;
-ru-RU	Female	&quot;Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)&quot;
-ru-RU	Male	&quot;Microsoft Server Speech Text to Speech Voice (ru-RU, Pavel, Apollo)&quot;
-zh-CN	Female	&quot;Microsoft Server Speech Text to Speech Voice (zh-CN, HuihuiRUS)&quot;
-zh-CN	Female	&quot;Microsoft Server Speech Text to Speech Voice (zh-CN, Yaoyao, Apollo)&quot;
-zh-CN	Male	&quot;Microsoft Server Speech Text to Speech Voice (zh-CN, Kangkang, Apollo)&quot;
-zh-HK	Female	&quot;Microsoft Server Speech Text to Speech Voice (zh-HK, Tracy, Apollo)&quot;
-zh-HK	Male	&quot;Microsoft Server Speech Text to Speech Voice (zh-HK, Danny, Apollo)&quot;
-zh-TW	Female	&quot;Microsoft Server Speech Text to Speech Voice (zh-TW, Yating, Apollo)&quot;
-zh-TW	Male	&quot;Microsoft Server Speech Text to Speech Voice (zh-TW, Zhiwei, Apollo)&quot;
+<pre><code>ar-EG*	Female
+de-DE	Female
+de-DE	Male
+en-AU	Female
+en-CA	Female
+en-GB	Female
+en-GB	Male
+en-IN	Male
+en-US	Female
+en-US	Male
+es-ES	Female
+es-ES	Male
+es-MX	Male
+fr-CA	Female
+fr-FR	Female
+fr-FR	Male
+hi-IN	Female
+it-IT	Male
+ja-JP	Female
+ja-JP	Male
+ko-KR	Female
+pt-BR	Male
+ru-RU	Female
+ru-RU	Male
+zh-CN	Female
+zh-CN	Female
+zh-CN	Male
+zh-HK	Female
+zh-HK	Male
+zh-TW	Female
+zh-TW	Male
 </code></pre>
+
+<p>英語の男性声でちょっと長めの文章を喋らせてみる</p>
+
+<pre><code>text = &quot;The Voice Browser Working Group has sought to develop standards to enable access to the Web using spoken interaction. The Speech Synthesis Markup Language Specification is one of these standards and is designed to provide a rich, XML-based markup language for assisting the generation of synthetic speech in Web and other applications. The essential role of the markup language is to provide authors of synthesizable content a standard way to control aspects of speech such as pronunciation, volume, pitch, rate, etc. across different synthesis-capable platforms.&quot;
+body = &quot;&lt;speak version='1.0' xml:lang='en-us'&gt;&lt;voice xml:lang='en-US' xml:gender='Female' name='Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)'&gt;&quot; + text + &quot;&lt;/voice&gt;&lt;/speak&gt;&quot;
+
+headers = {
+    &quot;Content-type&quot;:             &quot;application/ssml+xml&quot;,
+    &quot;X-Microsoft-OutputFormat&quot;: &quot;riff-16khz-16bit-mono-pcm&quot;,
+    &quot;Authorization&quot;:            &quot;Bearer &quot; + access_token,
+    &quot;User-Agent&quot;:               &quot;Meriken&quot;
+}
+
+# https://speech.platform.bing.com/synthesize
+conn = http.client.HTTPSConnection(&quot;speech.platform.bing.com&quot;)
+conn.request(&quot;POST&quot;, &quot;/synthesize&quot;, body.encode('utf-8'), headers)
+response = conn.getresponse()
+print(response.status, response.reason)
+
+data = response.read()
+conn.close()
+
+wav = open(&quot;sound2.wav&quot;, &quot;wb&quot;)
+wav.write(data)
+wav.close()
+</code></pre>
+
+<p>出力結果はこれ</p>
+
+<p><audio controls="" width="250px" height="150px">
+    <!-- <source src="sample.mp3" type="audio/mp3"> -->
+    <source src="sound2.wav" type="audio/wav">
+    <embed src="sound2.wav" type="audio/wav" width="240" height="50" autostart="false" controller="true" loop="false" pluginspage="http://www.apple.com/jp/quicktime/download/">
+</audio></p>
+
+<p>いい感じ</p>
 
 <h2 id="参照リンク">参照リンク</h2>
 
