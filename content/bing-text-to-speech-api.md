@@ -3,14 +3,15 @@ Categories = []
 Description = ""
 Tags = ["python", "Azure"]
 date = "2017-04-30T16:40:01+09:00"
-title = "Text-to-Speech API 使ってみる"
+title = "Azure の Text-to-Speech API 使ってみる"
 
 +++
 
-# Text-to-Speech API 使ってみる
+# Azure のText-to-Speech API 使ってみる
 
 ## 概要
 
+Text-to_Speech とは文字データから合成発声データを作成する技術のことである
 
 基本的には [Microsoft の Cognitive Services の API リファレンス](https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput) に従って API を叩けばできるが、音声データ作成処理に手間取ったりしたのでメモ書きとして残しておく
 
