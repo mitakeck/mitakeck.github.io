@@ -56,87 +56,54 @@
 	    </div>
 	    <hr>
 	    <div class="post content">
-	        
-
-<h1 id="文字画像からフォントを推定したい">文字画像からフォントを推定したい</h1>
-
+	        <h1 id="文字画像からフォントを推定したい">文字画像からフォントを推定したい</h1>
 <p>吊り広告や看板に使われているフォントがどういうフォントなのか気になるときがある。</p>
-
 <p>そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。</p>
-
 <p>それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。</p>
-
 <p>今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。</p>
-
-<p><img src="about.png" alt="about.png" /></p>
-
+<p><img src="about.png" alt="about.png"></p>
 <h2 id="概要">概要</h2>
-
 <ul>
 <li>入力は文字が書かれた画像データ
-
 <ul>
 <li>画像サイズは 64x64</li>
 <li>画像中には 1 文字だけ描画</li>
-</ul></li>
+</ul>
+</li>
 <li>出力は推定した文字のフォント
-
 <ul>
 <li>ただし 推定は以下 10 個のフォントの中から行う</li>
 <li>futura, gillsans, helvetica, opitma, andalemono, arial, impact, timenewroman, trebuchetms, verdana</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <h2 id="学習データの準備">学習データの準備</h2>
-
 <p>なにはともあれとりあえず学習データを用意する。</p>
-
 <p>今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。</p>
-
 <p>その際 ImageMagick を用いるとだいぶ楽ができる。</p>
-
 <h3 id="imagemagick-で画像を一括生成">ImageMagick で画像を一括生成</h3>
-
 <p>ImageMagick で指定フォントの文字画像を出力するには <code>font</code> と <code>label</code> オプションを最低限指定してやれば良い</p>
-
 <ul>
 <li><code>-font</code> にはフォントを指定</li>
 <li><code>label</code> には描画したい文字を指定</li>
 <li><code>output</code> には出力先の画像ファイル名を指定</li>
 </ul>
-
-<pre><code> $ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
-</code></pre>
-
-<p>あと出力される画像の見栄えの調節用オプションとして <code>background</code>, <code>fill</code>, <code>size</code>, <code>gravity</code> 等がある。</p>
-
+<pre tabindex="0"><code>$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
+</code></pre><p>あと出力される画像の見栄えの調節用オプションとして <code>background</code>, <code>fill</code>, <code>size</code>, <code>gravity</code> 等がある。</p>
 <p>詳しくは <a href="http://www.imagemagick.org/Usage/text/">ImageMagick v6 Examples &ndash;
- Text to Image Handling</a> を参照のこと。</p>
-
+Text to Image Handling</a> を参照のこと。</p>
 <p>例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。</p>
-
-<pre><code>$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
-</code></pre>
-
-<p>以下、a から z までの画像を出力した例</p>
-
-<p><img src="futura-a.png" alt="futura-a.png" /></p>
-
+<pre tabindex="0"><code>$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
+</code></pre><p>以下、a から z までの画像を出力した例</p>
+<p><img src="futura-a.png" alt="futura-a.png"></p>
 <h3 id="いろいろなフォントで-a-z-の画像を出力する">いろいろなフォントで a-z の画像を出力する</h3>
-
 <p>シェル芸で 10 種類分のフォント画像を準備する。
 その際、フォント一覧とフォントファイルの場所を記述した <code>fonts.txt</code> と、描画する文字データを記述した <code>data.txt</code> を用いた。</p>
-
 <p><code>join</code> で <code>fonts.txt</code> と <code>data.txt</code> をクロスジョインして <code>awk</code> で <code>convert</code> コマンドに文字列整形して <code>sh</code> で実行しています。</p>
-
-<pre><code>$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, '{print &quot;convert -background white -fill black -size 64x64 -gravity center -font \&quot;&quot; $3 &quot;\&quot; label:&quot; $4 &quot; train/&quot; $2 &quot;/&quot; $4 &quot;.png&quot;}' | sh
-</code></pre>
-
-<p>一応実際に使用した <code>fonts.txt</code> と <code>data.txt</code> を載せておきます。</p>
-
+<pre tabindex="0"><code>$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, &#39;{print &#34;convert -background white -fill black -size 64x64 -gravity center -font \&#34;&#34; $3 &#34;\&#34; label:&#34; $4 &#34; train/&#34; $2 &#34;/&#34; $4 &#34;.png&#34;}&#39; | sh
+</code></pre><p>一応実際に使用した <code>fonts.txt</code> と <code>data.txt</code> を載せておきます。</p>
 <p>fonts.txt</p>
-
-<pre><code>futura,/Library/Fonts/Futura.ttc
+<pre tabindex="0"><code>futura,/Library/Fonts/Futura.ttc
 gillsans,/Library/Fonts/GillSans.ttc
 helvetica,/System/Library/Fonts/HelveticaNeueDeskInterface.ttc
 opitma,/System/Library/Fonts/Optima.ttc
@@ -146,11 +113,8 @@ impact,/Library/Fonts/Impact.ttf
 timenewroman,/Library/Fonts/Times New Roman.ttf
 trebuchetms,/Library/Fonts/Trebuchet MS.ttf
 verdana,/Library/Fonts/Verdana.ttf
-</code></pre>
-
-<p>data.txt</p>
-
-<pre><code>a
+</code></pre><p>data.txt</p>
+<pre tabindex="0"><code>a
 b
 c
 d
@@ -176,16 +140,12 @@ w
 x
 y
 z
-</code></pre>
-
-<p>そして最後にディレクトリに配置する。</p>
-
+</code></pre><p>そして最後にディレクトリに配置する。</p>
 <ul>
 <li><code>train/</code> には学習用のデータを配置する</li>
 <li><code>validation</code> にはテスト用のデータを配置する。</li>
 </ul>
-
-<pre><code>.
+<pre tabindex="0"><code>.
 |-- train
 |   |-- andalemono
 |   |-- arial
@@ -208,135 +168,109 @@ z
     |-- timenewroman
     |-- trebuchetms
     `-- verdana
-</code></pre>
-
-<p>識別器の構築には keras を用いるのだが、以下のようなディレクトリ構成にしておくと、
+</code></pre><p>識別器の構築には keras を用いるのだが、以下のようなディレクトリ構成にしておくと、
 keras 側でいろいろと自動で処理してくれる。
 非常に便利だ。</p>
-
 <h3 id="学習データのかさ増し">学習データのかさ増し</h3>
-
 <p>学習用のデータを傾けたり位置をずらしたりした画像を大量に生成することで学習データをかさ増しする。</p>
-
 <p>ImageMagick でやれなくもないけど、Python のコードでかさ増しを行った。</p>
-
 <p>以下のコード片が回転処理と移動処理をランダムに行うコードである。
 いずれも OpenCV の python ラッパーの <code>cv2</code> を用いている。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">rotate</span>(src):
-    rows,cols <span style="color: #555555">=</span> src<span style="color: #555555">.</span>shape
-    r <span style="color: #555555">=</span> random<span style="color: #555555">.</span>uniform(<span style="color: #FF6600">0</span>, <span style="color: #FF6600">360</span>)
-    M <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>getRotationMatrix2D((cols<span style="color: #555555">/</span><span style="color: #FF6600">2</span>,rows<span style="color: #555555">/</span><span style="color: #FF6600">2</span>), r, <span style="color: #FF6600">1</span>)
-
-    <span style="color: #006699; font-weight: bold">return</span> cv2<span style="color: #555555">.</span>warpAffine(src, M, (rows, cols), flags<span style="color: #555555">=</span>cv2<span style="color: #555555">.</span>INTER_LINEAR)
-
-<span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">move</span>(src):
-    rows,cols <span style="color: #555555">=</span> src<span style="color: #555555">.</span>shape
-    dx <span style="color: #555555">=</span> random<span style="color: #555555">.</span>uniform(<span style="color: #FF6600">0</span>, <span style="color: #FF6600">5</span>)
-    dy <span style="color: #555555">=</span> random<span style="color: #555555">.</span>uniform(<span style="color: #FF6600">0</span>, <span style="color: #FF6600">5</span>)
-    M <span style="color: #555555">=</span> np<span style="color: #555555">.</span>float32([[<span style="color: #FF6600">1</span>, <span style="color: #FF6600">0</span>, dx],[<span style="color: #FF6600">0</span>, <span style="color: #FF6600">1</span>, dy]])
-
-    <span style="color: #006699; font-weight: bold">return</span> cv2<span style="color: #555555">.</span>warpAffine(src,M,(cols,rows))
-</pre></div>
-
-<p>指定画像に対して上記回転と移動処理を施し保存する処理。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">make</span>(imgs, pathToDataset, pathToDatasetSaved, n<span style="color: #555555">=</span><span style="color: #FF6600">100</span>):
-    <span style="color: #006699; font-weight: bold">for</span> img <span style="color: #000000; font-weight: bold">in</span> imgs:
-        <span style="color: #006699; font-weight: bold">if</span> img<span style="color: #555555">.</span>find(<span style="color: #CC3300">&quot;.png&quot;</span>) <span style="color: #555555">&gt;</span> <span style="color: #555555">-</span><span style="color: #FF6600">1</span> :
-            src <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>imread(pathToDataset <span style="color: #555555">+</span> img, <span style="color: #FF6600">0</span>)
-            src <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>resize(src, (imgSize, imgSize))
-            src <span style="color: #555555">=</span> cv2<span style="color: #555555">.</span>bitwise_not(src)
-            prefix <span style="color: #555555">=</span> img<span style="color: #555555">.</span>split(<span style="color: #CC3300">&quot;.&quot;</span>)[<span style="color: #FF6600">0</span>]
-            <span style="color: #006699; font-weight: bold">for</span> x <span style="color: #000000; font-weight: bold">in</span> <span style="color: #336666">xrange</span>(<span style="color: #FF6600">1</span>, n):
-                dst <span style="color: #555555">=</span> move(rotate(move(rotate(src))))
-                cv2<span style="color: #555555">.</span>imwrite(pathToDatasetSaved <span style="color: #555555">+</span> prefix <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;-&quot;</span> <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;{0:04d}&quot;</span><span style="color: #555555">.</span>format(x) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;.png&quot;</span>, dst)
-</pre></div>
-
-<h3 id="imagerdatagenherator-作成">ImagerDataGenherator 作成</h3>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">rotate</span>(src):
+</span></span><span style="display:flex;"><span>    rows,cols <span style="color:#555">=</span> src<span style="color:#555">.</span>shape
+</span></span><span style="display:flex;"><span>    r <span style="color:#555">=</span> random<span style="color:#555">.</span>uniform(<span style="color:#f60">0</span>, <span style="color:#f60">360</span>)
+</span></span><span style="display:flex;"><span>    M <span style="color:#555">=</span> cv2<span style="color:#555">.</span>getRotationMatrix2D((cols<span style="color:#555">/</span><span style="color:#f60">2</span>,rows<span style="color:#555">/</span><span style="color:#f60">2</span>), r, <span style="color:#f60">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">return</span> cv2<span style="color:#555">.</span>warpAffine(src, M, (rows, cols), flags<span style="color:#555">=</span>cv2<span style="color:#555">.</span>INTER_LINEAR)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">move</span>(src):
+</span></span><span style="display:flex;"><span>    rows,cols <span style="color:#555">=</span> src<span style="color:#555">.</span>shape
+</span></span><span style="display:flex;"><span>    dx <span style="color:#555">=</span> random<span style="color:#555">.</span>uniform(<span style="color:#f60">0</span>, <span style="color:#f60">5</span>)
+</span></span><span style="display:flex;"><span>    dy <span style="color:#555">=</span> random<span style="color:#555">.</span>uniform(<span style="color:#f60">0</span>, <span style="color:#f60">5</span>)
+</span></span><span style="display:flex;"><span>    M <span style="color:#555">=</span> np<span style="color:#555">.</span>float32([[<span style="color:#f60">1</span>, <span style="color:#f60">0</span>, dx],[<span style="color:#f60">0</span>, <span style="color:#f60">1</span>, dy]])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">return</span> cv2<span style="color:#555">.</span>warpAffine(src,M,(cols,rows))
+</span></span></code></pre></div><p>指定画像に対して上記回転と移動処理を施し保存する処理。</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">make</span>(imgs, pathToDataset, pathToDatasetSaved, n<span style="color:#555">=</span><span style="color:#f60">100</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">for</span> img <span style="color:#000;font-weight:bold">in</span> imgs:
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">if</span> img<span style="color:#555">.</span>find(<span style="color:#c30">&#34;.png&#34;</span>) <span style="color:#555">&gt;</span> <span style="color:#555">-</span><span style="color:#f60">1</span> :
+</span></span><span style="display:flex;"><span>            src <span style="color:#555">=</span> cv2<span style="color:#555">.</span>imread(pathToDataset <span style="color:#555">+</span> img, <span style="color:#f60">0</span>)
+</span></span><span style="display:flex;"><span>            src <span style="color:#555">=</span> cv2<span style="color:#555">.</span>resize(src, (imgSize, imgSize))
+</span></span><span style="display:flex;"><span>            src <span style="color:#555">=</span> cv2<span style="color:#555">.</span>bitwise_not(src)
+</span></span><span style="display:flex;"><span>            prefix <span style="color:#555">=</span> img<span style="color:#555">.</span>split(<span style="color:#c30">&#34;.&#34;</span>)[<span style="color:#f60">0</span>]
+</span></span><span style="display:flex;"><span>            <span style="color:#069;font-weight:bold">for</span> x <span style="color:#000;font-weight:bold">in</span> xrange(<span style="color:#f60">1</span>, n):
+</span></span><span style="display:flex;"><span>                dst <span style="color:#555">=</span> move(rotate(move(rotate(src))))
+</span></span><span style="display:flex;"><span>                cv2<span style="color:#555">.</span>imwrite(pathToDatasetSaved <span style="color:#555">+</span> prefix <span style="color:#555">+</span> <span style="color:#c30">&#34;-&#34;</span> <span style="color:#555">+</span> <span style="color:#c30">&#34;</span><span style="color:#a00">{0:04d}</span><span style="color:#c30">&#34;</span><span style="color:#555">.</span>format(x) <span style="color:#555">+</span> <span style="color:#c30">&#34;.png&#34;</span>, dst)
+</span></span></code></pre></div><h3 id="imagerdatagenherator-作成">ImagerDataGenherator 作成</h3>
 <p>画像データのバッチを生成するために Keras では <a href="https://keras.io/ja/preprocessing/image/">ImageDataGenerator</a> という仕組みが用意されている。</p>
-
 <p>今回は白黒画像なので <code>color_mode</code> を <code>grayscale</code> にして、他クラス分類させたいので、<code>class_mode</code> に <code>categorical</code> を指定する。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>img_width, img_height <span style="color: #555555">=</span> <span style="color: #FF6600">64</span>, <span style="color: #FF6600">64</span>
-
-train_data_dir <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/train&quot;</span>
-validation_data_dir <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/validation&quot;</span>
-
-datagen <span style="color: #555555">=</span> ImageDataGenerator(rescale<span style="color: #555555">=</span><span style="color: #FF6600">1.</span><span style="color: #555555">/</span><span style="color: #FF6600">255</span>)
-
-train_generator <span style="color: #555555">=</span> datagen<span style="color: #555555">.</span>flow_from_directory(
-        train_data_dir,
-        target_size<span style="color: #555555">=</span>(img_width, img_height),
-        batch_size<span style="color: #555555">=</span><span style="color: #FF6600">64</span>,
-        color_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;grayscale&quot;</span>,
-        class_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;categorical&quot;</span>)
-
-validation_generator <span style="color: #555555">=</span> datagen<span style="color: #555555">.</span>flow_from_directory(
-        validation_data_dir,
-        target_size<span style="color: #555555">=</span>(img_width, img_height),
-        batch_size<span style="color: #555555">=</span><span style="color: #FF6600">64</span>,
-        color_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;grayscale&quot;</span>,
-        class_mode<span style="color: #555555">=</span><span style="color: #CC3300">&quot;categorical&quot;</span>)
-</pre></div>
-
-<h2 id="学習モデル作成">学習モデル作成</h2>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>img_width, img_height <span style="color:#555">=</span> <span style="color:#f60">64</span>, <span style="color:#f60">64</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>train_data_dir <span style="color:#555">=</span> <span style="color:#c30">&#34;../datasets/data/train&#34;</span>
+</span></span><span style="display:flex;"><span>validation_data_dir <span style="color:#555">=</span> <span style="color:#c30">&#34;../datasets/data/validation&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>datagen <span style="color:#555">=</span> ImageDataGenerator(rescale<span style="color:#555">=</span><span style="color:#f60">1.</span><span style="color:#555">/</span><span style="color:#f60">255</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>train_generator <span style="color:#555">=</span> datagen<span style="color:#555">.</span>flow_from_directory(
+</span></span><span style="display:flex;"><span>        train_data_dir,
+</span></span><span style="display:flex;"><span>        target_size<span style="color:#555">=</span>(img_width, img_height),
+</span></span><span style="display:flex;"><span>        batch_size<span style="color:#555">=</span><span style="color:#f60">64</span>,
+</span></span><span style="display:flex;"><span>        color_mode<span style="color:#555">=</span><span style="color:#c30">&#34;grayscale&#34;</span>,
+</span></span><span style="display:flex;"><span>        class_mode<span style="color:#555">=</span><span style="color:#c30">&#34;categorical&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>validation_generator <span style="color:#555">=</span> datagen<span style="color:#555">.</span>flow_from_directory(
+</span></span><span style="display:flex;"><span>        validation_data_dir,
+</span></span><span style="display:flex;"><span>        target_size<span style="color:#555">=</span>(img_width, img_height),
+</span></span><span style="display:flex;"><span>        batch_size<span style="color:#555">=</span><span style="color:#f60">64</span>,
+</span></span><span style="display:flex;"><span>        color_mode<span style="color:#555">=</span><span style="color:#c30">&#34;grayscale&#34;</span>,
+</span></span><span style="display:flex;"><span>        class_mode<span style="color:#555">=</span><span style="color:#c30">&#34;categorical&#34;</span>)
+</span></span></code></pre></div><h2 id="学習モデル作成">学習モデル作成</h2>
 <p>次に NN の層を定義していく。</p>
-
 <p>Keras では <code>Sequential</code> モデルを最初に生成して、そいつに対して <code>.add()</code> メソッドを用いて層を追加していく形で NN を構築していく。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>model <span style="color: #555555">=</span> Sequential()
-model<span style="color: #555555">.</span>add(Convolution2D(<span style="color: #FF6600">32</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">3</span>, input_shape<span style="color: #555555">=</span>(img_width, img_height, <span style="color: #FF6600">1</span>)))
-model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
-model<span style="color: #555555">.</span>add(MaxPooling2D(pool_size<span style="color: #555555">=</span>(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">2</span>)))
-
-model<span style="color: #555555">.</span>add(Convolution2D(<span style="color: #FF6600">32</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">3</span>))
-model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
-model<span style="color: #555555">.</span>add(MaxPooling2D(pool_size<span style="color: #555555">=</span>(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">2</span>)))
-
-model<span style="color: #555555">.</span>add(Convolution2D(<span style="color: #FF6600">64</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">3</span>))
-model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
-model<span style="color: #555555">.</span>add(MaxPooling2D(pool_size<span style="color: #555555">=</span>(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">2</span>)))
-
-model<span style="color: #555555">.</span>add(Flatten())
-model<span style="color: #555555">.</span>add(Dense(<span style="color: #FF6600">64</span>))
-model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;relu&#39;</span>))
-model<span style="color: #555555">.</span>add(Dropout(<span style="color: #FF6600">0.5</span>))
-model<span style="color: #555555">.</span>add(Dense(<span style="color: #FF6600">10</span>))
-model<span style="color: #555555">.</span>add(Activation(<span style="color: #CC3300">&#39;sigmoid&#39;</span>))
-</pre></div>
-
-<p>そしてモデルの学習の前に <code>compile()</code> メソッドを使って幾つかの設定を行う必要がある。</p>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>model <span style="color:#555">=</span> Sequential()
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Convolution2D(<span style="color:#f60">32</span>, <span style="color:#f60">3</span>, <span style="color:#f60">3</span>, input_shape<span style="color:#555">=</span>(img_width, img_height, <span style="color:#f60">1</span>)))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Activation(<span style="color:#c30">&#39;relu&#39;</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(MaxPooling2D(pool_size<span style="color:#555">=</span>(<span style="color:#f60">2</span>, <span style="color:#f60">2</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Convolution2D(<span style="color:#f60">32</span>, <span style="color:#f60">3</span>, <span style="color:#f60">3</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Activation(<span style="color:#c30">&#39;relu&#39;</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(MaxPooling2D(pool_size<span style="color:#555">=</span>(<span style="color:#f60">2</span>, <span style="color:#f60">2</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Convolution2D(<span style="color:#f60">64</span>, <span style="color:#f60">3</span>, <span style="color:#f60">3</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Activation(<span style="color:#c30">&#39;relu&#39;</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(MaxPooling2D(pool_size<span style="color:#555">=</span>(<span style="color:#f60">2</span>, <span style="color:#f60">2</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Flatten())
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Dense(<span style="color:#f60">64</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Activation(<span style="color:#c30">&#39;relu&#39;</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Dropout(<span style="color:#f60">0.5</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Dense(<span style="color:#f60">10</span>))
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>add(Activation(<span style="color:#c30">&#39;sigmoid&#39;</span>))
+</span></span></code></pre></div><p>そしてモデルの学習の前に <code>compile()</code> メソッドを使って幾つかの設定を行う必要がある。</p>
 <ul>
 <li><code>loss</code> : 損失関数の設定</li>
 <li><code>optimizer</code> : 最適化手法の設定</li>
 <li><code>metrics</code> : 評価指標の設定</li>
 </ul>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>model<span style="color: #555555">.</span>compile(loss<span style="color: #555555">=</span><span style="color: #CC3300">&#39;binary_crossentropy&#39;</span>,
-              optimizer<span style="color: #555555">=</span><span style="color: #CC3300">&#39;Adam&#39;</span>,
-              metrics<span style="color: #555555">=</span>[<span style="color: #CC3300">&#39;accuracy&#39;</span>])
-</pre></div>
-
-<!-- ![model.png](model.png) -->
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>model<span style="color:#555">.</span>compile(loss<span style="color:#555">=</span><span style="color:#c30">&#39;binary_crossentropy&#39;</span>,
+</span></span><span style="display:flex;"><span>              optimizer<span style="color:#555">=</span><span style="color:#c30">&#39;Adam&#39;</span>,
+</span></span><span style="display:flex;"><span>              metrics<span style="color:#555">=</span>[<span style="color:#c30">&#39;accuracy&#39;</span>])
+</span></span></code></pre></div><!-- raw HTML omitted -->
 <h2 id="学習">学習</h2>
-
 <p>いよいよモデルを学習させる。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># ハイパーパラメタ</span>
-nb_epoch <span style="color: #555555">=</span> <span style="color: #FF6600">300</span>
-nb_train_samples <span style="color: #555555">=</span> <span style="color: #FF6600">2048</span>
-nb_validation_samples <span style="color: #555555">=</span> <span style="color: #FF6600">832</span>
-</pre></div>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># 学習を行う</span>
-<span style="color: #0099FF; font-style: italic"># fit_generator() の返り値に学習過程のデータが得られる</span>
-history <span style="color: #555555">=</span> model<span style="color: #555555">.</span>fit_generator(
-        train_generator,
-        samples_per_epoch<span style="color: #555555">=</span>nb_train_samples,
-        nb_epoch<span style="color: #555555">=</span>nb_epoch,
-        validation_data<span style="color: #555555">=</span>validation_generator,
-        nb_val_samples<span style="color: #555555">=</span>nb_validation_samples)
-</pre></div>
-
-<pre><code>Epoch 1/300
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># ハイパーパラメタ</span>
+</span></span><span style="display:flex;"><span>nb_epoch <span style="color:#555">=</span> <span style="color:#f60">300</span>
+</span></span><span style="display:flex;"><span>nb_train_samples <span style="color:#555">=</span> <span style="color:#f60">2048</span>
+</span></span><span style="display:flex;"><span>nb_validation_samples <span style="color:#555">=</span> <span style="color:#f60">832</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># 学習を行う</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># fit_generator() の返り値に学習過程のデータが得られる</span>
+</span></span><span style="display:flex;"><span>history <span style="color:#555">=</span> model<span style="color:#555">.</span>fit_generator(
+</span></span><span style="display:flex;"><span>        train_generator,
+</span></span><span style="display:flex;"><span>        samples_per_epoch<span style="color:#555">=</span>nb_train_samples,
+</span></span><span style="display:flex;"><span>        nb_epoch<span style="color:#555">=</span>nb_epoch,
+</span></span><span style="display:flex;"><span>        validation_data<span style="color:#555">=</span>validation_generator,
+</span></span><span style="display:flex;"><span>        nb_val_samples<span style="color:#555">=</span>nb_validation_samples)
+</span></span></code></pre></div><pre tabindex="0"><code>Epoch 1/300
 2048/2048 [==============================] - 13s - loss: 0.4733 - acc: 0.8062 - val_loss: 0.3308 - val_acc: 0.9000
 Epoch 2/300
 2048/2048 [==============================] - 13s - loss: 0.3765 - acc: 0.8884 - val_loss: 0.3329 - val_acc: 0.9000
@@ -367,130 +301,109 @@ Epoch 299/300
 2048/2048 [==============================] - 13s - loss: 0.0869 - acc: 0.9557 - val_loss: 0.0710 - val_acc: 0.9632
 Epoch 300/300
 2048/2048 [==============================] - 13s - loss: 0.0913 - acc: 0.9562 - val_loss: 0.0725 - val_acc: 0.9619
-</code></pre>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">print</span> model<span style="color: #555555">.</span>evaluate_generator(validation_generator, nb_validation_samples)
-<span style="color: #0099FF; font-style: italic"># [0.068484609230206564, 0.9645432738157419]</span>
-<span style="color: #0099FF; font-style: italic"># loss と accuracy の値が得られる</span>
-</pre></div>
-
-<p><code>save_weights()</code> メソッドを用いて、モデルを保存しておく</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># モデルを保存する</span>
-model<span style="color: #555555">.</span>save_weights(<span style="color: #CC3300">&#39;e300.h5&#39;</span>)
-</pre></div>
-
-<p>識別精度
-<img src="modelacc.png" alt="modelacc.png" /></p>
-
+</code></pre><div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#366">print</span> model<span style="color:#555">.</span>evaluate_generator(validation_generator, nb_validation_samples)
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># [0.068484609230206564, 0.9645432738157419]</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># loss と accuracy の値が得られる</span>
+</span></span></code></pre></div><p><code>save_weights()</code> メソッドを用いて、モデルを保存しておく</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># モデルを保存する</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>save_weights(<span style="color:#c30">&#39;e300.h5&#39;</span>)
+</span></span></code></pre></div><p>識別精度
+<img src="modelacc.png" alt="modelacc.png"></p>
 <p>ロス
-<img src="modelloss.png" alt="modelloss.png" /></p>
-
+<img src="modelloss.png" alt="modelloss.png"></p>
 <h2 id="とりあえずモデルを使ってみる">とりあえずモデルを使ってみる</h2>
-
 <p>てきとうに画像を突っ込んでフォントを推定してみる</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #0099FF; font-style: italic"># 推定処理</span>
-<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">keras.preprocessing</span> <span style="color: #006699; font-weight: bold">import</span> image
-fonts <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
-lefts <span style="color: #555555">=</span> np<span style="color: #555555">.</span>array([<span style="color: #FF6600">0</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>, <span style="color: #FF6600">3</span>, <span style="color: #FF6600">4</span>, <span style="color: #FF6600">5</span>, <span style="color: #FF6600">6</span>, <span style="color: #FF6600">7</span>, <span style="color: #FF6600">8</span>, <span style="color: #FF6600">9</span>])
-
-<span style="color: #0099FF; font-style: italic"># 学習済みの重みをロード</span>
-model<span style="color: #555555">.</span>load_weights(<span style="color: #CC3300">&#39;e300.h5&#39;</span>)
-model<span style="color: #555555">.</span>compile(loss<span style="color: #555555">=</span><span style="color: #CC3300">&#39;binary_crossentropy&#39;</span>,
-              optimizer<span style="color: #555555">=</span><span style="color: #CC3300">&#39;Adam&#39;</span>,
-              metrics<span style="color: #555555">=</span>[<span style="color: #CC3300">&#39;accuracy&#39;</span>])
-
-<span style="color: #0099FF; font-style: italic"># 適当にデータを読み込ませる</span>
-filename <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/validation/andalemono/f-0911.png&quot;</span>
-
-img <span style="color: #555555">=</span> image<span style="color: #555555">.</span>load_img(filename, target_size<span style="color: #555555">=</span>(img_height, img_width), grayscale<span style="color: #555555">=</span><span style="color: #336666">True</span>)
-x <span style="color: #555555">=</span> image<span style="color: #555555">.</span>img_to_array(img)
-x <span style="color: #555555">=</span> np<span style="color: #555555">.</span>expand_dims(x, axis<span style="color: #555555">=</span><span style="color: #FF6600">0</span>)
-
-x <span style="color: #555555">=</span> x <span style="color: #555555">/</span> <span style="color: #FF6600">255.0</span>
-
-pred <span style="color: #555555">=</span> model<span style="color: #555555">.</span>predict(x)[<span style="color: #FF6600">0</span>]
-plt<span style="color: #555555">.</span>subplot(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">1</span>)
-plt<span style="color: #555555">.</span>imshow(img)
-plt<span style="color: #555555">.</span>subplot(<span style="color: #FF6600">2</span>, <span style="color: #FF6600">1</span>, <span style="color: #FF6600">2</span>)
-plt<span style="color: #555555">.</span>barh(lefts, pred, tick_label<span style="color: #555555">=</span>fonts, align<span style="color: #555555">=</span><span style="color: #CC3300">&quot;center&quot;</span>)
-</pre></div>
-
-<p><img src="predict.png" alt="predict.png" /></p>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># 推定処理</span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">keras.preprocessing</span> <span style="color:#069;font-weight:bold">import</span> image
+</span></span><span style="display:flex;"><span>fonts <span style="color:#555">=</span> [<span style="color:#c30">&#34;andalemono&#34;</span>, <span style="color:#c30">&#34;arial&#34;</span>, <span style="color:#c30">&#34;futura&#34;</span>, <span style="color:#c30">&#34;gillsans&#34;</span>, <span style="color:#c30">&#34;helvetica&#34;</span>, <span style="color:#c30">&#34;impact&#34;</span>, <span style="color:#c30">&#34;opitma&#34;</span>, <span style="color:#c30">&#34;timenewroman&#34;</span>, <span style="color:#c30">&#34;trebuchetms&#34;</span>, <span style="color:#c30">&#34;verdana&#34;</span>]
+</span></span><span style="display:flex;"><span>lefts <span style="color:#555">=</span> np<span style="color:#555">.</span>array([<span style="color:#f60">0</span>, <span style="color:#f60">1</span>, <span style="color:#f60">2</span>, <span style="color:#f60">3</span>, <span style="color:#f60">4</span>, <span style="color:#f60">5</span>, <span style="color:#f60">6</span>, <span style="color:#f60">7</span>, <span style="color:#f60">8</span>, <span style="color:#f60">9</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># 学習済みの重みをロード</span>
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>load_weights(<span style="color:#c30">&#39;e300.h5&#39;</span>)
+</span></span><span style="display:flex;"><span>model<span style="color:#555">.</span>compile(loss<span style="color:#555">=</span><span style="color:#c30">&#39;binary_crossentropy&#39;</span>,
+</span></span><span style="display:flex;"><span>              optimizer<span style="color:#555">=</span><span style="color:#c30">&#39;Adam&#39;</span>,
+</span></span><span style="display:flex;"><span>              metrics<span style="color:#555">=</span>[<span style="color:#c30">&#39;accuracy&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># 適当にデータを読み込ませる</span>
+</span></span><span style="display:flex;"><span>filename <span style="color:#555">=</span> <span style="color:#c30">&#34;../datasets/data/validation/andalemono/f-0911.png&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>img <span style="color:#555">=</span> image<span style="color:#555">.</span>load_img(filename, target_size<span style="color:#555">=</span>(img_height, img_width), grayscale<span style="color:#555">=</span><span style="color:#069;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>x <span style="color:#555">=</span> image<span style="color:#555">.</span>img_to_array(img)
+</span></span><span style="display:flex;"><span>x <span style="color:#555">=</span> np<span style="color:#555">.</span>expand_dims(x, axis<span style="color:#555">=</span><span style="color:#f60">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>x <span style="color:#555">=</span> x <span style="color:#555">/</span> <span style="color:#f60">255.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pred <span style="color:#555">=</span> model<span style="color:#555">.</span>predict(x)[<span style="color:#f60">0</span>]
+</span></span><span style="display:flex;"><span>plt<span style="color:#555">.</span>subplot(<span style="color:#f60">2</span>, <span style="color:#f60">1</span>, <span style="color:#f60">1</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#555">.</span>imshow(img)
+</span></span><span style="display:flex;"><span>plt<span style="color:#555">.</span>subplot(<span style="color:#f60">2</span>, <span style="color:#f60">1</span>, <span style="color:#f60">2</span>)
+</span></span><span style="display:flex;"><span>plt<span style="color:#555">.</span>barh(lefts, pred, tick_label<span style="color:#555">=</span>fonts, align<span style="color:#555">=</span><span style="color:#c30">&#34;center&#34;</span>)
+</span></span></code></pre></div><p><img src="predict.png" alt="predict.png"></p>
 <p>いい感じ。</p>
-
 <h3 id="混合行列を描画する">混合行列を描画する</h3>
-
 <p>さっきの予測処理を関数化する</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">def</span> <span style="color: #CC00FF">predict</span>(imagepath):
-    fonts <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
-    img <span style="color: #555555">=</span> image<span style="color: #555555">.</span>load_img(filename, target_size<span style="color: #555555">=</span>(img_height, img_width), grayscale<span style="color: #555555">=</span><span style="color: #336666">True</span>)
-    x <span style="color: #555555">=</span> image<span style="color: #555555">.</span>img_to_array(img)
-    x <span style="color: #555555">=</span> np<span style="color: #555555">.</span>expand_dims(x, axis<span style="color: #555555">=</span><span style="color: #FF6600">0</span>)
-
-    x <span style="color: #555555">=</span> x <span style="color: #555555">/</span> <span style="color: #FF6600">255.0</span>
-
-    pred <span style="color: #555555">=</span> model<span style="color: #555555">.</span>predict(x)[<span style="color: #FF6600">0</span>]
-    pred_index <span style="color: #555555">=</span> np<span style="color: #555555">.</span>argmax(pred)
-    <span style="color: #006699; font-weight: bold">return</span> pred_index, fonts[pred_index]
-</pre></div>
-
-<p>テスト用データに対して予測処理をして、配列に格納する処理</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>data <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;a&quot;</span>, <span style="color: #CC3300">&quot;b&quot;</span>, <span style="color: #CC3300">&quot;c&quot;</span>, <span style="color: #CC3300">&quot;d&quot;</span>, <span style="color: #CC3300">&quot;e&quot;</span>, <span style="color: #CC3300">&quot;f&quot;</span>, <span style="color: #CC3300">&quot;g&quot;</span>, <span style="color: #CC3300">&quot;h&quot;</span>, <span style="color: #CC3300">&quot;i&quot;</span>, <span style="color: #CC3300">&quot;j&quot;</span>, <span style="color: #CC3300">&quot;k&quot;</span>, <span style="color: #CC3300">&quot;l&quot;</span>, <span style="color: #CC3300">&quot;m&quot;</span>, <span style="color: #CC3300">&quot;n&quot;</span>, <span style="color: #CC3300">&quot;o&quot;</span>, <span style="color: #CC3300">&quot;p&quot;</span>, <span style="color: #CC3300">&quot;q&quot;</span>, <span style="color: #CC3300">&quot;r&quot;</span>, <span style="color: #CC3300">&quot;s&quot;</span>, <span style="color: #CC3300">&quot;t&quot;</span>, <span style="color: #CC3300">&quot;u&quot;</span>, <span style="color: #CC3300">&quot;v&quot;</span>, <span style="color: #CC3300">&quot;w&quot;</span>, <span style="color: #CC3300">&quot;x&quot;</span>, <span style="color: #CC3300">&quot;y&quot;</span>, <span style="color: #CC3300">&quot;z&quot;</span>]
-
-acc <span style="color: #555555">=</span> [[], [], [], [], [], [], [], [], [], []]
-incre <span style="color: #555555">=</span> <span style="color: #FF6600">1.0</span> <span style="color: #555555">/</span> <span style="color: #FF6600">260.0</span>
-
-<span style="color: #006699; font-weight: bold">for</span> font <span style="color: #000000; font-weight: bold">in</span> fonts:
-    font_index <span style="color: #555555">=</span> fonts<span style="color: #555555">.</span>index(font)
-    acc[font_index] <span style="color: #555555">=</span> [<span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>, <span style="color: #FF6600">0.0</span>]
-    <span style="color: #006699; font-weight: bold">for</span> d <span style="color: #000000; font-weight: bold">in</span> data:
-        <span style="color: #006699; font-weight: bold">for</span> i <span style="color: #000000; font-weight: bold">in</span> <span style="color: #336666">xrange</span>(<span style="color: #FF6600">10</span>):
-            <span style="color: #336666">file</span> <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;../datasets/data/validation/&quot;</span> <span style="color: #555555">+</span> font <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;/&quot;</span> <span style="color: #555555">+</span> d <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;-091&quot;</span> <span style="color: #555555">+</span> <span style="color: #336666">str</span>(i) <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;.png&quot;</span>
-            pred <span style="color: #555555">=</span> predict(<span style="color: #336666">file</span>)
-            acc[font_index][pred[<span style="color: #FF6600">0</span>]] <span style="color: #555555">+=</span> incre
-</pre></div>
-
-<p>最後に混合行列を描画する。
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">def</span> <span style="color:#c0f">predict</span>(imagepath):
+</span></span><span style="display:flex;"><span>    fonts <span style="color:#555">=</span> [<span style="color:#c30">&#34;andalemono&#34;</span>, <span style="color:#c30">&#34;arial&#34;</span>, <span style="color:#c30">&#34;futura&#34;</span>, <span style="color:#c30">&#34;gillsans&#34;</span>, <span style="color:#c30">&#34;helvetica&#34;</span>, <span style="color:#c30">&#34;impact&#34;</span>, <span style="color:#c30">&#34;opitma&#34;</span>, <span style="color:#c30">&#34;timenewroman&#34;</span>, <span style="color:#c30">&#34;trebuchetms&#34;</span>, <span style="color:#c30">&#34;verdana&#34;</span>]
+</span></span><span style="display:flex;"><span>    img <span style="color:#555">=</span> image<span style="color:#555">.</span>load_img(filename, target_size<span style="color:#555">=</span>(img_height, img_width), grayscale<span style="color:#555">=</span><span style="color:#069;font-weight:bold">True</span>)
+</span></span><span style="display:flex;"><span>    x <span style="color:#555">=</span> image<span style="color:#555">.</span>img_to_array(img)
+</span></span><span style="display:flex;"><span>    x <span style="color:#555">=</span> np<span style="color:#555">.</span>expand_dims(x, axis<span style="color:#555">=</span><span style="color:#f60">0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    x <span style="color:#555">=</span> x <span style="color:#555">/</span> <span style="color:#f60">255.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    pred <span style="color:#555">=</span> model<span style="color:#555">.</span>predict(x)[<span style="color:#f60">0</span>]
+</span></span><span style="display:flex;"><span>    pred_index <span style="color:#555">=</span> np<span style="color:#555">.</span>argmax(pred)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">return</span> pred_index, fonts[pred_index]
+</span></span></code></pre></div><p>テスト用データに対して予測処理をして、配列に格納する処理</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>data <span style="color:#555">=</span> [<span style="color:#c30">&#34;a&#34;</span>, <span style="color:#c30">&#34;b&#34;</span>, <span style="color:#c30">&#34;c&#34;</span>, <span style="color:#c30">&#34;d&#34;</span>, <span style="color:#c30">&#34;e&#34;</span>, <span style="color:#c30">&#34;f&#34;</span>, <span style="color:#c30">&#34;g&#34;</span>, <span style="color:#c30">&#34;h&#34;</span>, <span style="color:#c30">&#34;i&#34;</span>, <span style="color:#c30">&#34;j&#34;</span>, <span style="color:#c30">&#34;k&#34;</span>, <span style="color:#c30">&#34;l&#34;</span>, <span style="color:#c30">&#34;m&#34;</span>, <span style="color:#c30">&#34;n&#34;</span>, <span style="color:#c30">&#34;o&#34;</span>, <span style="color:#c30">&#34;p&#34;</span>, <span style="color:#c30">&#34;q&#34;</span>, <span style="color:#c30">&#34;r&#34;</span>, <span style="color:#c30">&#34;s&#34;</span>, <span style="color:#c30">&#34;t&#34;</span>, <span style="color:#c30">&#34;u&#34;</span>, <span style="color:#c30">&#34;v&#34;</span>, <span style="color:#c30">&#34;w&#34;</span>, <span style="color:#c30">&#34;x&#34;</span>, <span style="color:#c30">&#34;y&#34;</span>, <span style="color:#c30">&#34;z&#34;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>acc <span style="color:#555">=</span> [[], [], [], [], [], [], [], [], [], []]
+</span></span><span style="display:flex;"><span>incre <span style="color:#555">=</span> <span style="color:#f60">1.0</span> <span style="color:#555">/</span> <span style="color:#f60">260.0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">for</span> font <span style="color:#000;font-weight:bold">in</span> fonts:
+</span></span><span style="display:flex;"><span>    font_index <span style="color:#555">=</span> fonts<span style="color:#555">.</span>index(font)
+</span></span><span style="display:flex;"><span>    acc[font_index] <span style="color:#555">=</span> [<span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>, <span style="color:#f60">0.0</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">for</span> d <span style="color:#000;font-weight:bold">in</span> data:
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">for</span> i <span style="color:#000;font-weight:bold">in</span> xrange(<span style="color:#f60">10</span>):
+</span></span><span style="display:flex;"><span>            file <span style="color:#555">=</span> <span style="color:#c30">&#34;../datasets/data/validation/&#34;</span> <span style="color:#555">+</span> font <span style="color:#555">+</span> <span style="color:#c30">&#34;/&#34;</span> <span style="color:#555">+</span> d <span style="color:#555">+</span> <span style="color:#c30">&#34;-091&#34;</span> <span style="color:#555">+</span> <span style="color:#366">str</span>(i) <span style="color:#555">+</span> <span style="color:#c30">&#34;.png&#34;</span>
+</span></span><span style="display:flex;"><span>            pred <span style="color:#555">=</span> predict(file)
+</span></span><span style="display:flex;"><span>            acc[font_index][pred[<span style="color:#f60">0</span>]] <span style="color:#555">+=</span> incre
+</span></span></code></pre></div><p>最後に混合行列を描画する。
 描画には <code>matplotlib</code> で行った。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">matplotlib.pyplot</span> <span style="color: #006699; font-weight: bold">import</span> specgram
-<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">sklearn.metrics</span> <span style="color: #006699; font-weight: bold">import</span> confusion_matrix
-<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">sklearn.svm</span> <span style="color: #006699; font-weight: bold">import</span> LinearSVC
-<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">sklearn.utils</span> <span style="color: #006699; font-weight: bold">import</span> resample
-<span style="color: #006699; font-weight: bold">from</span> <span style="color: #00CCFF; font-weight: bold">matplotlib</span> <span style="color: #006699; font-weight: bold">import</span> pylab
-<span style="color: #006699; font-weight: bold">import</span> <span style="color: #00CCFF; font-weight: bold">numpy</span> <span style="color: #006699; font-weight: bold">as</span> <span style="color: #00CCFF; font-weight: bold">np</span>
-
-cm <span style="color: #555555">=</span> acc
-name_list <span style="color: #555555">=</span> [<span style="color: #CC3300">&quot;andalemono&quot;</span>, <span style="color: #CC3300">&quot;arial&quot;</span>, <span style="color: #CC3300">&quot;futura&quot;</span>, <span style="color: #CC3300">&quot;gillsans&quot;</span>, <span style="color: #CC3300">&quot;helvetica&quot;</span>, <span style="color: #CC3300">&quot;impact&quot;</span>, <span style="color: #CC3300">&quot;opitma&quot;</span>, <span style="color: #CC3300">&quot;timenewroman&quot;</span>, <span style="color: #CC3300">&quot;trebuchetms&quot;</span>, <span style="color: #CC3300">&quot;verdana&quot;</span>]
-title <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;Font Prediction&quot;</span>
-
-pylab<span style="color: #555555">.</span>clf()
-pylab<span style="color: #555555">.</span>matshow(cm, fignum<span style="color: #555555">=</span><span style="color: #336666">False</span>, cmap<span style="color: #555555">=</span><span style="color: #CC3300">&#39;Blues&#39;</span>, vmin<span style="color: #555555">=</span><span style="color: #FF6600">0</span>, vmax<span style="color: #555555">=</span><span style="color: #FF6600">1</span>)
-ax <span style="color: #555555">=</span> pylab<span style="color: #555555">.</span>axes()
-ax<span style="color: #555555">.</span>set_xticks(<span style="color: #336666">range</span>(<span style="color: #336666">len</span>(name_list)))
-ax<span style="color: #555555">.</span>set_xticklabels(name_list, rotation<span style="color: #555555">=</span><span style="color: #FF6600">90</span>)
-ax<span style="color: #555555">.</span>xaxis<span style="color: #555555">.</span>set_ticks_position(<span style="color: #CC3300">&quot;bottom&quot;</span>)
-ax<span style="color: #555555">.</span>set_yticks(<span style="color: #336666">range</span>(<span style="color: #336666">len</span>(name_list)))
-ax<span style="color: #555555">.</span>set_yticklabels(name_list)
-
-pylab<span style="color: #555555">.</span>title(title)
-pylab<span style="color: #555555">.</span>colorbar()
-pylab<span style="color: #555555">.</span>grid(<span style="color: #336666">False</span>)
-pylab<span style="color: #555555">.</span>xlabel(<span style="color: #CC3300">&#39;Predict class&#39;</span>)
-pylab<span style="color: #555555">.</span>ylabel(<span style="color: #CC3300">&#39;True class&#39;</span>)
-pylab<span style="color: #555555">.</span>grid(<span style="color: #336666">False</span>)
-pylab<span style="color: #555555">.</span>show()
-</pre></div>
-
-<p><img src="confusion_matrix.png" alt="confusion_matrix.png" /></p>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">matplotlib.pyplot</span> <span style="color:#069;font-weight:bold">import</span> specgram
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">sklearn.metrics</span> <span style="color:#069;font-weight:bold">import</span> confusion_matrix
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">sklearn.svm</span> <span style="color:#069;font-weight:bold">import</span> LinearSVC
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">sklearn.utils</span> <span style="color:#069;font-weight:bold">import</span> resample
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">from</span> <span style="color:#0cf;font-weight:bold">matplotlib</span> <span style="color:#069;font-weight:bold">import</span> pylab
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">import</span> <span style="color:#0cf;font-weight:bold">numpy</span> <span style="color:#069;font-weight:bold">as</span> <span style="color:#0cf;font-weight:bold">np</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cm <span style="color:#555">=</span> acc
+</span></span><span style="display:flex;"><span>name_list <span style="color:#555">=</span> [<span style="color:#c30">&#34;andalemono&#34;</span>, <span style="color:#c30">&#34;arial&#34;</span>, <span style="color:#c30">&#34;futura&#34;</span>, <span style="color:#c30">&#34;gillsans&#34;</span>, <span style="color:#c30">&#34;helvetica&#34;</span>, <span style="color:#c30">&#34;impact&#34;</span>, <span style="color:#c30">&#34;opitma&#34;</span>, <span style="color:#c30">&#34;timenewroman&#34;</span>, <span style="color:#c30">&#34;trebuchetms&#34;</span>, <span style="color:#c30">&#34;verdana&#34;</span>]
+</span></span><span style="display:flex;"><span>title <span style="color:#555">=</span> <span style="color:#c30">&#34;Font Prediction&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>clf()
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>matshow(cm, fignum<span style="color:#555">=</span><span style="color:#069;font-weight:bold">False</span>, cmap<span style="color:#555">=</span><span style="color:#c30">&#39;Blues&#39;</span>, vmin<span style="color:#555">=</span><span style="color:#f60">0</span>, vmax<span style="color:#555">=</span><span style="color:#f60">1</span>)
+</span></span><span style="display:flex;"><span>ax <span style="color:#555">=</span> pylab<span style="color:#555">.</span>axes()
+</span></span><span style="display:flex;"><span>ax<span style="color:#555">.</span>set_xticks(<span style="color:#366">range</span>(<span style="color:#366">len</span>(name_list)))
+</span></span><span style="display:flex;"><span>ax<span style="color:#555">.</span>set_xticklabels(name_list, rotation<span style="color:#555">=</span><span style="color:#f60">90</span>)
+</span></span><span style="display:flex;"><span>ax<span style="color:#555">.</span>xaxis<span style="color:#555">.</span>set_ticks_position(<span style="color:#c30">&#34;bottom&#34;</span>)
+</span></span><span style="display:flex;"><span>ax<span style="color:#555">.</span>set_yticks(<span style="color:#366">range</span>(<span style="color:#366">len</span>(name_list)))
+</span></span><span style="display:flex;"><span>ax<span style="color:#555">.</span>set_yticklabels(name_list)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>title(title)
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>colorbar()
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>grid(<span style="color:#069;font-weight:bold">False</span>)
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>xlabel(<span style="color:#c30">&#39;Predict class&#39;</span>)
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>ylabel(<span style="color:#c30">&#39;True class&#39;</span>)
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>grid(<span style="color:#069;font-weight:bold">False</span>)
+</span></span><span style="display:flex;"><span>pylab<span style="color:#555">.</span>show()
+</span></span></code></pre></div><p><img src="confusion_matrix.png" alt="confusion_matrix.png"></p>
 <h2 id="まとめ">まとめ</h2>
-
 <ul>
 <li>ある程度精度は出るっぽいので、対象フォント数を増やしたい
-
 <ul>
 <li>なぜか Helvetica の認識率だけ悪いのは気になる</li>
-</ul></li>
+</ul>
+</li>
 <li>実際にフォント推定器をスマホアプリとかに埋め込みたい</li>
 </ul>
 
@@ -502,8 +415,8 @@ pylab<span style="color: #555555">.</span>show()
     </p>
 </div>
 		<nav id="pagination">
-			<a class="prev" href="http://mitakeck.github.io/bing-text-to-speech-api/">Prev</a>
-			<a class="next" href="http://mitakeck.github.io/oreilly-free-ebooks-dl/">Next</a>
+			<a class="prev" href="http://mitakeck.github.io/oreilly-free-ebooks-dl/">Prev</a>
+			<a class="next" href="http://mitakeck.github.io/bing-text-to-speech-api/">Next</a>
 		</nav>
 	
 		        <footer>

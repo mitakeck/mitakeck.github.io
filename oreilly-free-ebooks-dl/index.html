@@ -52,92 +52,80 @@
 	    </div>
 	    <hr>
 	    <div class="post content">
-	        
-
-<h2 id="概要">概要</h2>
-
+	        <h2 id="概要">概要</h2>
 <p><a href="https://github.com/deeplook/freebora">freebora</a> という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
-Python で書かれており、ソースコードは Github で公開されている。<br />
+Python で書かれており、ソースコードは Github で公開されている。<br>
 電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。</p>
-
-<hr />
-
+<hr>
 <h2 id="ソースコード探索">ソースコード探索</h2>
-
 <p>探索と言っても重要な部分は  <a href="https://github.com/deeplook/freebora/blob/master/freebora/freebora.py"><code>freebora/freebora/freebora.py</code></a> 内にすべてまとまっていて、大まかに以下の流れで無料電子書籍を抽出/ダウンロードしていた。</p>
-
 <ul>
-<li>1. <code>http://shop.oreilly.com/category/ebooks.do</code> にアクセスしカテゴリ一覧を取得</li>
-<li>2. <code>http://shop.oreilly.com/category/ebooks/[category].do</code> にアクセスし電子書籍一覧を取得</li>
-<li>3. 値段が <code>$0.00</code> に設定されている電子書籍ページ URL を抽出</li>
-<li>4. 対象電子書籍ページの URL を整形して、ダウンロード</li>
+<li>
+<ol>
+<li><code>http://shop.oreilly.com/category/ebooks.do</code> にアクセスしカテゴリ一覧を取得</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li><code>http://shop.oreilly.com/category/ebooks/[category].do</code> にアクセスし電子書籍一覧を取得</li>
+</ol>
+</li>
+<li>
+<ol start="3">
+<li>値段が <code>$0.00</code> に設定されている電子書籍ページ URL を抽出</li>
+</ol>
+</li>
+<li>
+<ol start="4">
+<li>対象電子書籍ページの URL を整形して、ダウンロード</li>
+</ol>
+</li>
 </ul>
-
 <p>処理 4. のダウンロード URL 整形処理に関してだけ補足。</p>
-
-<p>以下に <code>freebora</code> から抜粋したソースコードを掲載する。<br />
+<p>以下に <code>freebora</code> から抜粋したソースコードを掲載する。<br>
 ソースコード内の <code>for</code> 内部が処理 4 となる。
 重要なのは <code>re.sub()</code> で、それぞれの URL を <code>.csp</code> を <code>.pdf</code> に<code>/free/</code> を <code>/free/files/</code> に置換する処理を行っている。</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span><span style="color: #555555">...</span>
-<span style="color: #0099FF; font-style: italic"># https://github.com/deeplook/freebora/blob/master/freebora/freebora.py#L56-L73 より引用</span>
-t2 <span style="color: #555555">=</span> etree<span style="color: #555555">.</span>parse(<span style="color: #CC3300">&#39;http://shop.oreilly.com&#39;</span> <span style="color: #555555">+</span> page_url, parser<span style="color: #555555">=</span>p)
-xp <span style="color: #555555">=</span> <span style="color: #CC3300">&#39;//span[@class=&quot;price&quot;][contains(., &quot;$0.00&quot;)]/&#39;</span>\
-     <span style="color: #CC3300">&#39;../../../../div[@class=&quot;thumbheader&quot;]/a/@href&#39;</span>
-paths <span style="color: #555555">=</span> t2<span style="color: #555555">.</span>xpath(xp)
-<span style="color: #006699; font-weight: bold">for</span> j, path <span style="color: #000000; font-weight: bold">in</span> <span style="color: #336666">enumerate</span>(paths):
-    url <span style="color: #555555">=</span> <span style="color: #CC3300">&#39;http://shop.oreilly.com&#39;</span> <span style="color: #555555">+</span> path
-    html <span style="color: #555555">=</span> requests<span style="color: #555555">.</span>get(url)<span style="color: #555555">.</span>text
-    url_csps <span style="color: #555555">=</span> re<span style="color: #555555">.</span>findall(<span style="color: #CC3300">&#39;path_info\:\s+(.*?\.csp)&#39;</span>, html)
-    <span style="color: #006699; font-weight: bold">if</span> <span style="color: #336666">len</span>(url_csps) <span style="color: #555555">!=</span> <span style="color: #FF6600">1</span>:
-        <span style="color: #006699; font-weight: bold">continue</span>
-    url_csp <span style="color: #555555">=</span> url_csps[<span style="color: #FF6600">0</span>]
-    url_csp <span style="color: #555555">=</span> re<span style="color: #555555">.</span>sub(<span style="color: #CC3300">&#39;\?.*&#39;</span>, <span style="color: #CC3300">&#39;&#39;</span>, url_csp)
-    url_pdf <span style="color: #555555">=</span> re<span style="color: #555555">.</span>sub(<span style="color: #CC3300">&#39;\.csp&#39;</span>, <span style="color: #CC3300">&#39;.pdf&#39;</span>, url_csp)
-    url_pdf <span style="color: #555555">=</span> re<span style="color: #555555">.</span>sub(<span style="color: #CC3300">&#39;/free/&#39;</span>, <span style="color: #CC3300">&#39;/free/files/&#39;</span>, url_pdf)
-    u <span style="color: #555555">=</span> <span style="color: #CC3300">&#39;http://www.oreilly.com/</span><span style="color: #AA0000">%s</span><span style="color: #CC3300">&#39;</span> <span style="color: #555555">%</span> url_pdf
-    <span style="color: #006699; font-weight: bold">if</span> verbose:
-        <span style="color: #006699; font-weight: bold">print</span>(u)
-    <span style="color: #006699; font-weight: bold">yield</span> u
-<span style="color: #555555">...</span>
-</pre></div>
-
-<p>実際の無料電子書籍 URL から手動で上記処理 4 を実行してみる。</p>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#555">...</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># https://github.com/deeplook/freebora/blob/master/freebora/freebora.py#L56-L73 より引用</span>
+</span></span><span style="display:flex;"><span>t2 <span style="color:#555">=</span> etree<span style="color:#555">.</span>parse(<span style="color:#c30">&#39;http://shop.oreilly.com&#39;</span> <span style="color:#555">+</span> page_url, parser<span style="color:#555">=</span>p)
+</span></span><span style="display:flex;"><span>xp <span style="color:#555">=</span> <span style="color:#c30">&#39;//span[@class=&#34;price&#34;][contains(., &#34;$0.00&#34;)]/&#39;</span>\
+</span></span><span style="display:flex;"><span>     <span style="color:#c30">&#39;../../../../div[@class=&#34;thumbheader&#34;]/a/@href&#39;</span>
+</span></span><span style="display:flex;"><span>paths <span style="color:#555">=</span> t2<span style="color:#555">.</span>xpath(xp)
+</span></span><span style="display:flex;"><span><span style="color:#069;font-weight:bold">for</span> j, path <span style="color:#000;font-weight:bold">in</span> <span style="color:#366">enumerate</span>(paths):
+</span></span><span style="display:flex;"><span>    url <span style="color:#555">=</span> <span style="color:#c30">&#39;http://shop.oreilly.com&#39;</span> <span style="color:#555">+</span> path
+</span></span><span style="display:flex;"><span>    html <span style="color:#555">=</span> requests<span style="color:#555">.</span>get(url)<span style="color:#555">.</span>text
+</span></span><span style="display:flex;"><span>    url_csps <span style="color:#555">=</span> re<span style="color:#555">.</span>findall(<span style="color:#c30">&#39;path_info\:\s+(.*?\.csp)&#39;</span>, html)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> <span style="color:#366">len</span>(url_csps) <span style="color:#555">!=</span> <span style="color:#f60">1</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#069;font-weight:bold">continue</span>
+</span></span><span style="display:flex;"><span>    url_csp <span style="color:#555">=</span> url_csps[<span style="color:#f60">0</span>]
+</span></span><span style="display:flex;"><span>    url_csp <span style="color:#555">=</span> re<span style="color:#555">.</span>sub(<span style="color:#c30">&#39;\?.*&#39;</span>, <span style="color:#c30">&#39;&#39;</span>, url_csp)
+</span></span><span style="display:flex;"><span>    url_pdf <span style="color:#555">=</span> re<span style="color:#555">.</span>sub(<span style="color:#c30">&#39;\.csp&#39;</span>, <span style="color:#c30">&#39;.pdf&#39;</span>, url_csp)
+</span></span><span style="display:flex;"><span>    url_pdf <span style="color:#555">=</span> re<span style="color:#555">.</span>sub(<span style="color:#c30">&#39;/free/&#39;</span>, <span style="color:#c30">&#39;/free/files/&#39;</span>, url_pdf)
+</span></span><span style="display:flex;"><span>    u <span style="color:#555">=</span> <span style="color:#c30">&#39;http://www.oreilly.com/</span><span style="color:#a00">%s</span><span style="color:#c30">&#39;</span> <span style="color:#555">%</span> url_pdf
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">if</span> verbose:
+</span></span><span style="display:flex;"><span>        <span style="color:#366">print</span>(u)
+</span></span><span style="display:flex;"><span>    <span style="color:#069;font-weight:bold">yield</span> u
+</span></span><span style="display:flex;"><span><span style="color:#555">...</span>
+</span></span></code></pre></div><p>実際の無料電子書籍 URL から手動で上記処理 4 を実行してみる。</p>
 <p>下記 URL は『Guidelines for Keeping Pace with Innovation and Tech Adoption』という電子書籍のページ。こいつに対してさっきの置換処理を実行する。</p>
-
-<p><img src="oreilly1.png" alt="oreilly1.png" /></p>
-
+<p><img src="oreilly1.png" alt="oreilly1.png"></p>
 <p><a href="http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp">http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp</a> に対して <code>.csp</code> を <code>.pdf</code> に<code>/free/</code> を <code>/free/files/</code> に置換する処理を施す。
 すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。</p>
-
-<p><img src="url.png" alt="url.prg" /></p>
-
+<p><img src="url.png" alt="url.prg"></p>
 <p>アクセスしてみる。</p>
-
-<p><img src="oreilly2.png" alt="oreilly2.png" /></p>
-
+<p><img src="oreilly2.png" alt="oreilly2.png"></p>
 <p>対象書籍の PDF を閲覧できた。</p>
-
 <h2 id="気づき">気づき</h2>
-
-<h3 id="1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い">1.<code>http://www.oreilly.com/[category]/free/</code>からスクレイプしたほうが早い</h3>
-
+<h3 id="1httpwwworeillycomcategoryfreeからスクレイプしたほうが早い">1.<code>http://www.oreilly.com/[category]/free/</code>からスクレイプしたほうが早い</h3>
 <p>freedora は <code>http://shop.oreilly.com/category/ebooks/[category].do</code> から無料になっている電子書籍を探していたが、実は Oreilly さんが無料本に関しては <code>http://www.oreilly.com/[category]/free/</code> にまとめてくれている。
 なのでそちらからスクレイピングしたほうが処理としてはスマートになりそう。</p>
-
 <p>ちなみにカテゴリは以下のものがあります</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>category <span style="color: #555555">=</span> {<span style="color: #CC3300">&quot;business&quot;</span>, <span style="color: #CC3300">&quot;data&quot;</span>, <span style="color: #CC3300">&quot;iot&quot;</span>, <span style="color: #CC3300">&quot;design&quot;</span>, <span style="color: #CC3300">&quot;programming&quot;</span>, <span style="color: #CC3300">&quot;security&quot;</span>, <span style="color: #CC3300">&quot;web-platform&quot;</span>, <span style="color: #CC3300">&quot;webops&quot;</span>}
-</pre></div>
-
-<h3 id="2-pdf-以外のフォーマットもダウンロードできる">2. PDF 以外のフォーマットもダウンロードできる</h3>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>category <span style="color:#555">=</span> {<span style="color:#c30">&#34;business&#34;</span>, <span style="color:#c30">&#34;data&#34;</span>, <span style="color:#c30">&#34;iot&#34;</span>, <span style="color:#c30">&#34;design&#34;</span>, <span style="color:#c30">&#34;programming&#34;</span>, <span style="color:#c30">&#34;security&#34;</span>, <span style="color:#c30">&#34;web-platform&#34;</span>, <span style="color:#c30">&#34;webops&#34;</span>}
+</span></span></code></pre></div><h3 id="2-pdf-以外のフォーマットもダウンロードできる">2. PDF 以外のフォーマットもダウンロードできる</h3>
 <p>freedora では PDF 形式の電子書籍をダウンロードしてくるのだが、
 <code>.pdf</code> 以外にも <code>.epub</code>, <code>.mobi</code> フォーマットの存在を確認した。</p>
-
 <p>Kindle Paper で電子書籍を読んでいると <code>.pdf</code> より <code>.mobi</code> のほうが扱いが良かったりするので、必要に合わせてフォーマットを指定すると良さげ。</p>
-
 <h2 id="参考-url-等">参考 URL 等</h2>
-
 <ul>
 <li><a href="https://github.com/deeplook/freebora">https://github.com/deeplook/freebora</a> : Download free ebooks from O&rsquo;Reilly.</li>
 </ul>
@@ -150,8 +138,8 @@ paths <span style="color: #555555">=</span> t2<span style="color: #555555">.</sp
     </p>
 </div>
 		<nav id="pagination">
-			<a class="prev" href="http://mitakeck.github.io/cnn-font-analyzer/">Prev</a>
-			<a class="next" href="http://mitakeck.github.io/page/">Next</a>
+			<a class="prev" href="http://mitakeck.github.io/page/">Prev</a>
+			<a class="next" href="http://mitakeck.github.io/cnn-font-analyzer/">Next</a>
 		</nav>
 	
 		        <footer>

@@ -48,30 +48,27 @@
 	    </div>
 	    <hr>
 	    <div class="post content">
-	        
-
-<h1 id="hugo-のテスト">hugo のテスト</h1>
-
+	        <h1 id="hugo-のテスト">hugo のテスト</h1>
 <ul>
 <li>シンタックスハイライトとか</li>
 </ul>
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e "s/.*content=\"\(.*\)\".*/\1/g"
-# => http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg
-
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e "s/.*content=\"\(.*\)\".*/\1/g"
-# => http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg
-
-% curl -Lso-  http://www.asahi.com/articles/ASHD96K3YHD9UTIL04L.html | grep meta |  grep og:image | sed -e "s/.*content=\"\(.*\)\".*/\1/g"
-# => http://www.asahicom.jp/articles/images/AS20151209004367_comm.jpg
-
-% curl -Lso- http://www.cnn.co.jp/world/35074672.html  | grep meta |  grep og:image | sed -e "s/.*content=\"\(.*\)\".*/\1/g"              
-# => http://www.cnn.co.jp/storage/2015/12/09/26290e751df22d92b3d72b36a65d95b3/france-russia-police-dog.jpg
-
-% curl -Lso-  http://ggsoku.com/2015/12/minecraft-for-wii-u-released-1217/ | grep meta |  grep og:image | sed -e "s/.*content=\"\(.*\)\".*/\1/g"
-# => http://ggsoku.com/index.php?aam_media=101921&size=original
-
-%
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zsh" data-lang="zsh"><span style="display:flex;"><span>% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e <span style="color:#c30">&#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># =&gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e <span style="color:#c30">&#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># =&gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>% curl -Lso-  http://www.asahi.com/articles/ASHD96K3YHD9UTIL04L.html | grep meta |  grep og:image | sed -e <span style="color:#c30">&#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># =&gt; http://www.asahicom.jp/articles/images/AS20151209004367_comm.jpg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>% curl -Lso- http://www.cnn.co.jp/world/35074672.html  | grep meta |  grep og:image | sed -e <span style="color:#c30">&#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;</span>              
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># =&gt; http://www.cnn.co.jp/storage/2015/12/09/26290e751df22d92b3d72b36a65d95b3/france-russia-police-dog.jpg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>% curl -Lso-  http://ggsoku.com/2015/12/minecraft-for-wii-u-released-1217/ | grep meta |  grep og:image | sed -e <span style="color:#c30">&#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># =&gt; http://ggsoku.com/index.php?aam_media=101921&amp;#038;size=original</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>%
+</span></span></code></pre></div>
 	    </div>
 	    
 	<div class="about">
@@ -80,8 +77,8 @@
     </p>
 </div>
 		<nav id="pagination">
-			<a class="prev" href="http://mitakeck.github.io/oreilly-free-ebooks-dl/">Prev</a>
 			
+			<a class="next" href="http://mitakeck.github.io/oreilly-free-ebooks-dl/">Next</a>
 		</nav>
 	
 		        <footer>

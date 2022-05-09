@@ -52,93 +52,67 @@
 	    </div>
 	    <hr>
 	    <div class="post content">
-	        
-
-<h1 id="azure-のtext-to-speech-api-使ってみる">Azure のText-to-Speech API 使ってみる</h1>
-
+	        <h1 id="azure-のtext-to-speech-api-使ってみる">Azure のText-to-Speech API 使ってみる</h1>
 <h2 id="概要">概要</h2>
-
 <p>Text-to_Speech とは文字データから合成発声データを作成する技術のことである</p>
-
 <p>基本的には <a href="https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput">Microsoft の Cognitive Services の API リファレンス</a> に従って API を叩けばできるが、音声データ作成処理に手間取ったりしたのでメモ書きとして残しておく</p>
-
 <p>Cognitive Service を Python から叩くことを想定している</p>
-
 <p>一連の流れをまとめたファイルは以下から閲覧できる
 <a href="https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f">https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f</a></p>
-
 <h2 id="アクセストークンを取得する">アクセストークンを取得する</h2>
-
 <p>なんか知らないけど、Cognitive Searvice のサブスクリプションキーを Azure で発行した後に、アクセストークンを取得しないといけないらしい</p>
-
 <p>Header に <code>Ocp-Apim-Subscription-Key</code> をキーとして、サブスクリプションキーを挿入して <code>https://api.cognitive.microsoft.com/sts/v1.0/issueToken</code> へ　POST すると返却値にアクセストークンが渡ってくる</p>
-
 <p>ここで取得したアクセストークンは音声データを作成する際に使いまわすものになる</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>subscription_key <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&lt; サブスクリプションキー &gt;&quot;</span>
-headers <span style="color: #555555">=</span> {
-    <span style="color: #CC3300">&quot;Content-type&quot;</span>:              <span style="color: #CC3300">&quot;application/x-www-form-urlencoded&quot;</span>,
-    <span style="color: #CC3300">&quot;Ocp-Apim-Subscription-Key&quot;</span>: subscription_key
-}
-access_token_host <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;api.cognitive.microsoft.com&quot;</span>
-path <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;/sts/v1.0/issueToken&quot;</span>
-
-conn <span style="color: #555555">=</span> http<span style="color: #555555">.</span>client<span style="color: #555555">.</span>HTTPSConnection(access_token_host)
-conn<span style="color: #555555">.</span>request(<span style="color: #CC3300">&quot;POST&quot;</span>, path, params, headers)
-response <span style="color: #555555">=</span> conn<span style="color: #555555">.</span>getresponse()
-
-<span style="color: #006699; font-weight: bold">print</span>(response<span style="color: #555555">.</span>status, response<span style="color: #555555">.</span>reason)
-
-data <span style="color: #555555">=</span> response<span style="color: #555555">.</span>read()
-conn<span style="color: #555555">.</span>close()
-
-access_token <span style="color: #555555">=</span> data<span style="color: #555555">.</span>decode(<span style="color: #CC3300">&quot;UTF-8&quot;</span>)
-<span style="color: #006699; font-weight: bold">print</span> (<span style="color: #CC3300">&quot;Access Token: &quot;</span> <span style="color: #555555">+</span> access_token)
-</pre></div>
-
-<h2 id="音声データを作成する">音声データを作成する</h2>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>subscription_key <span style="color:#555">=</span> <span style="color:#c30">&#34;&lt; サブスクリプションキー &gt;&#34;</span>
+</span></span><span style="display:flex;"><span>headers <span style="color:#555">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;Content-type&#34;</span>:              <span style="color:#c30">&#34;application/x-www-form-urlencoded&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;Ocp-Apim-Subscription-Key&#34;</span>: subscription_key
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>access_token_host <span style="color:#555">=</span> <span style="color:#c30">&#34;api.cognitive.microsoft.com&#34;</span>
+</span></span><span style="display:flex;"><span>path <span style="color:#555">=</span> <span style="color:#c30">&#34;/sts/v1.0/issueToken&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>conn <span style="color:#555">=</span> http<span style="color:#555">.</span>client<span style="color:#555">.</span>HTTPSConnection(access_token_host)
+</span></span><span style="display:flex;"><span>conn<span style="color:#555">.</span>request(<span style="color:#c30">&#34;POST&#34;</span>, path, params, headers)
+</span></span><span style="display:flex;"><span>response <span style="color:#555">=</span> conn<span style="color:#555">.</span>getresponse()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#366">print</span>(response<span style="color:#555">.</span>status, response<span style="color:#555">.</span>reason)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data <span style="color:#555">=</span> response<span style="color:#555">.</span>read()
+</span></span><span style="display:flex;"><span>conn<span style="color:#555">.</span>close()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>access_token <span style="color:#555">=</span> data<span style="color:#555">.</span>decode(<span style="color:#c30">&#34;UTF-8&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#366">print</span> (<span style="color:#c30">&#34;Access Token: &#34;</span> <span style="color:#555">+</span> access_token)
+</span></span></code></pre></div><h2 id="音声データを作成する">音声データを作成する</h2>
 <p>音声データを作成するには <code>https://speech.platform.bing.com/synthesize</code> にデータを投げれば良い</p>
-
 <p>上記のエンドポイントに対して喋らせる内容や声色はリクエストの POST クエリパラメータに <a href="https://www.w3.org/TR/speech-synthesis/">SSML 形式</a> で入れて、アクセストークンや音声ファイルの形式なんかはリクエストの Header に入れればおｋ</p>
-
 <p>プログラム中では日本語のテキストデータを与えると、発声データが wav ファイルとしてレスポンスデータに乗っかってくるので、ファイルとして書き出して保存する処理をしている</p>
-<div class="highlight" style="background: #f0f3f3"><pre style="line-height: 125%"><span></span>text <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;日本語しゃべります&quot;</span>
-body <span style="color: #555555">=</span> <span style="color: #CC3300">&quot;&lt;speak version=&#39;1.0&#39; xml:lang=&#39;en-us&#39;&gt;&lt;voice xml:lang=&#39;ja-jp&#39; xml:gender=&#39;Female&#39; name=&#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&#39;&gt;&quot;</span> <span style="color: #555555">+</span> text <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;&lt;/voice&gt;&lt;/speak&gt;&quot;</span>
-
-headers <span style="color: #555555">=</span> {
-    <span style="color: #CC3300">&quot;Content-type&quot;</span>:             <span style="color: #CC3300">&quot;application/ssml+xml&quot;</span>,
-    <span style="color: #CC3300">&quot;X-Microsoft-OutputFormat&quot;</span>: <span style="color: #CC3300">&quot;riff-16khz-16bit-mono-pcm&quot;</span>,
-    <span style="color: #CC3300">&quot;Authorization&quot;</span>:            <span style="color: #CC3300">&quot;Bearer &quot;</span> <span style="color: #555555">+</span> access_token,
-    <span style="color: #CC3300">&quot;User-Agent&quot;</span>:               <span style="color: #CC3300">&quot;Meriken&quot;</span>
-}
-
-<span style="color: #0099FF; font-style: italic"># https://speech.platform.bing.com/synthesize</span>
-conn <span style="color: #555555">=</span> http<span style="color: #555555">.</span>client<span style="color: #555555">.</span>HTTPSConnection(<span style="color: #CC3300">&quot;speech.platform.bing.com&quot;</span>)
-conn<span style="color: #555555">.</span>request(<span style="color: #CC3300">&quot;POST&quot;</span>, <span style="color: #CC3300">&quot;/synthesize&quot;</span>, body<span style="color: #555555">.</span>encode(<span style="color: #CC3300">&#39;utf-8&#39;</span>), headers)
-response <span style="color: #555555">=</span> conn<span style="color: #555555">.</span>getresponse()
-<span style="color: #006699; font-weight: bold">print</span>(response<span style="color: #555555">.</span>status, response<span style="color: #555555">.</span>reason)
-
-data <span style="color: #555555">=</span> response<span style="color: #555555">.</span>read()
-conn<span style="color: #555555">.</span>close()
-
-wav <span style="color: #555555">=</span> <span style="color: #336666">open</span>(<span style="color: #CC3300">&quot;download-&quot;</span> <span style="color: #555555">+</span> text <span style="color: #555555">+</span> <span style="color: #CC3300">&quot;.wav&quot;</span>, <span style="color: #CC3300">&quot;wb&quot;</span>)
-wav<span style="color: #555555">.</span>write(data)
-wav<span style="color: #555555">.</span>close()
-</pre></div>
-
-<p>実際に作成された wav ファイルがこれ</p>
-
-<p><audio controls="" width="250px" height="150px">
-    <!-- <source src="sample.mp3" type="audio/mp3"> -->
-    <source src="sound1.wav" type="audio/wav">
-    <embed src="sound1.wav" type="audio/wav" width="240" height="50" autostart="false" controller="true" loop="false" pluginspage="http://www.apple.com/jp/quicktime/download/">
-</audio></p>
-
+<div class="highlight"><pre tabindex="0" style="background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>text <span style="color:#555">=</span> <span style="color:#c30">&#34;日本語しゃべります&#34;</span>
+</span></span><span style="display:flex;"><span>body <span style="color:#555">=</span> <span style="color:#c30">&#34;&lt;speak version=&#39;1.0&#39; xml:lang=&#39;en-us&#39;&gt;&lt;voice xml:lang=&#39;ja-jp&#39; xml:gender=&#39;Female&#39; name=&#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&#39;&gt;&#34;</span> <span style="color:#555">+</span> text <span style="color:#555">+</span> <span style="color:#c30">&#34;&lt;/voice&gt;&lt;/speak&gt;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>headers <span style="color:#555">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;Content-type&#34;</span>:             <span style="color:#c30">&#34;application/ssml+xml&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;X-Microsoft-OutputFormat&#34;</span>: <span style="color:#c30">&#34;riff-16khz-16bit-mono-pcm&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;Authorization&#34;</span>:            <span style="color:#c30">&#34;Bearer &#34;</span> <span style="color:#555">+</span> access_token,
+</span></span><span style="display:flex;"><span>    <span style="color:#c30">&#34;User-Agent&#34;</span>:               <span style="color:#c30">&#34;Meriken&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#09f;font-style:italic"># https://speech.platform.bing.com/synthesize</span>
+</span></span><span style="display:flex;"><span>conn <span style="color:#555">=</span> http<span style="color:#555">.</span>client<span style="color:#555">.</span>HTTPSConnection(<span style="color:#c30">&#34;speech.platform.bing.com&#34;</span>)
+</span></span><span style="display:flex;"><span>conn<span style="color:#555">.</span>request(<span style="color:#c30">&#34;POST&#34;</span>, <span style="color:#c30">&#34;/synthesize&#34;</span>, body<span style="color:#555">.</span>encode(<span style="color:#c30">&#39;utf-8&#39;</span>), headers)
+</span></span><span style="display:flex;"><span>response <span style="color:#555">=</span> conn<span style="color:#555">.</span>getresponse()
+</span></span><span style="display:flex;"><span><span style="color:#366">print</span>(response<span style="color:#555">.</span>status, response<span style="color:#555">.</span>reason)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>data <span style="color:#555">=</span> response<span style="color:#555">.</span>read()
+</span></span><span style="display:flex;"><span>conn<span style="color:#555">.</span>close()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>wav <span style="color:#555">=</span> <span style="color:#366">open</span>(<span style="color:#c30">&#34;download-&#34;</span> <span style="color:#555">+</span> text <span style="color:#555">+</span> <span style="color:#c30">&#34;.wav&#34;</span>, <span style="color:#c30">&#34;wb&#34;</span>)
+</span></span><span style="display:flex;"><span>wav<span style="color:#555">.</span>write(data)
+</span></span><span style="display:flex;"><span>wav<span style="color:#555">.</span>close()
+</span></span></code></pre></div><p>実際に作成された wav ファイルがこれ</p>
+<!-- raw HTML omitted -->
 <h2 id="声色を変えてみる">声色を変えてみる</h2>
-
 <p>声色は何種類か用意されていて、日本語は男性声と女性声と 2 種類ある</p>
-
-<pre><code>ar-EG*	Female
+<pre tabindex="0"><code>ar-EG*	Female
 de-DE	Female
 de-DE	Male
 en-AU	Female
@@ -169,46 +143,33 @@ zh-HK	Female
 zh-HK	Male
 zh-TW	Female
 zh-TW	Male
-</code></pre>
-
-<p>英語の男性声でちょっと長めの文章を喋らせてみる</p>
-
-<pre><code>text = &quot;The Voice Browser Working Group has sought to develop standards to enable access to the Web using spoken interaction. The Speech Synthesis Markup Language Specification is one of these standards and is designed to provide a rich, XML-based markup language for assisting the generation of synthetic speech in Web and other applications. The essential role of the markup language is to provide authors of synthesizable content a standard way to control aspects of speech such as pronunciation, volume, pitch, rate, etc. across different synthesis-capable platforms.&quot;
-body = &quot;&lt;speak version='1.0' xml:lang='en-us'&gt;&lt;voice xml:lang='en-US' xml:gender='Female' name='Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)'&gt;&quot; + text + &quot;&lt;/voice&gt;&lt;/speak&gt;&quot;
+</code></pre><p>英語の男性声でちょっと長めの文章を喋らせてみる</p>
+<pre tabindex="0"><code>text = &#34;The Voice Browser Working Group has sought to develop standards to enable access to the Web using spoken interaction. The Speech Synthesis Markup Language Specification is one of these standards and is designed to provide a rich, XML-based markup language for assisting the generation of synthetic speech in Web and other applications. The essential role of the markup language is to provide authors of synthesizable content a standard way to control aspects of speech such as pronunciation, volume, pitch, rate, etc. across different synthesis-capable platforms.&#34;
+body = &#34;&lt;speak version=&#39;1.0&#39; xml:lang=&#39;en-us&#39;&gt;&lt;voice xml:lang=&#39;en-US&#39; xml:gender=&#39;Female&#39; name=&#39;Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)&#39;&gt;&#34; + text + &#34;&lt;/voice&gt;&lt;/speak&gt;&#34;
 
 headers = {
-    &quot;Content-type&quot;:             &quot;application/ssml+xml&quot;,
-    &quot;X-Microsoft-OutputFormat&quot;: &quot;riff-16khz-16bit-mono-pcm&quot;,
-    &quot;Authorization&quot;:            &quot;Bearer &quot; + access_token,
-    &quot;User-Agent&quot;:               &quot;Meriken&quot;
+    &#34;Content-type&#34;:             &#34;application/ssml+xml&#34;,
+    &#34;X-Microsoft-OutputFormat&#34;: &#34;riff-16khz-16bit-mono-pcm&#34;,
+    &#34;Authorization&#34;:            &#34;Bearer &#34; + access_token,
+    &#34;User-Agent&#34;:               &#34;Meriken&#34;
 }
 
 # https://speech.platform.bing.com/synthesize
-conn = http.client.HTTPSConnection(&quot;speech.platform.bing.com&quot;)
-conn.request(&quot;POST&quot;, &quot;/synthesize&quot;, body.encode('utf-8'), headers)
+conn = http.client.HTTPSConnection(&#34;speech.platform.bing.com&#34;)
+conn.request(&#34;POST&#34;, &#34;/synthesize&#34;, body.encode(&#39;utf-8&#39;), headers)
 response = conn.getresponse()
 print(response.status, response.reason)
 
 data = response.read()
 conn.close()
 
-wav = open(&quot;sound2.wav&quot;, &quot;wb&quot;)
+wav = open(&#34;sound2.wav&#34;, &#34;wb&#34;)
 wav.write(data)
 wav.close()
-</code></pre>
-
-<p>出力結果はこれ</p>
-
-<p><audio controls="" width="250px" height="150px">
-    <!-- <source src="sample.mp3" type="audio/mp3"> -->
-    <source src="sound2.wav" type="audio/wav">
-    <embed src="sound2.wav" type="audio/wav" width="240" height="50" autostart="false" controller="true" loop="false" pluginspage="http://www.apple.com/jp/quicktime/download/">
-</audio></p>
-
+</code></pre><p>出力結果はこれ</p>
+<!-- raw HTML omitted -->
 <p>いい感じ</p>
-
 <h2 id="参照リンク">参照リンク</h2>
-
 <ul>
 <li><a href="https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput">https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput</a></li>
 <li><a href="https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript">https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript</a></li>
@@ -223,8 +184,8 @@ wav.close()
     </p>
 </div>
 		<nav id="pagination">
+			<a class="prev" href="http://mitakeck.github.io/cnn-font-analyzer/">Prev</a>
 			
-			<a class="next" href="http://mitakeck.github.io/cnn-font-analyzer/">Next</a>
 		</nav>
 	
 		        <footer>

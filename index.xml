@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
       <title>mitakeck.github.io on mitakeck.github.io </title>
@@ -13,93 +12,67 @@
       <pubDate>Sun, 30 Apr 2017 16:40:01 JST</pubDate>
       <author>Alexander Ivanov</author>
       <guid>http://mitakeck.github.io/bing-text-to-speech-api/</guid>
-      <description>
-
-&lt;h1 id=&#34;azure-のtext-to-speech-api-使ってみる&#34;&gt;Azure のText-to-Speech API 使ってみる&lt;/h1&gt;
-
+      <description>&lt;h1 id=&#34;azure-のtext-to-speech-api-使ってみる&#34;&gt;Azure のText-to-Speech API 使ってみる&lt;/h1&gt;
 &lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
-
 &lt;p&gt;Text-to_Speech とは文字データから合成発声データを作成する技術のことである&lt;/p&gt;
-
 &lt;p&gt;基本的には &lt;a href=&#34;https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput&#34;&gt;Microsoft の Cognitive Services の API リファレンス&lt;/a&gt; に従って API を叩けばできるが、音声データ作成処理に手間取ったりしたのでメモ書きとして残しておく&lt;/p&gt;
-
 &lt;p&gt;Cognitive Service を Python から叩くことを想定している&lt;/p&gt;
-
 &lt;p&gt;一連の流れをまとめたファイルは以下から閲覧できる
 &lt;a href=&#34;https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f&#34;&gt;https://gist.github.com/mitakeck/b2a953dfdf84b1e2c0d3c950d812ad0f&lt;/a&gt;&lt;/p&gt;
-
 &lt;h2 id=&#34;アクセストークンを取得する&#34;&gt;アクセストークンを取得する&lt;/h2&gt;
-
 &lt;p&gt;なんか知らないけど、Cognitive Searvice のサブスクリプションキーを Azure で発行した後に、アクセストークンを取得しないといけないらしい&lt;/p&gt;
-
 &lt;p&gt;Header に &lt;code&gt;Ocp-Apim-Subscription-Key&lt;/code&gt; をキーとして、サブスクリプションキーを挿入して &lt;code&gt;https://api.cognitive.microsoft.com/sts/v1.0/issueToken&lt;/code&gt; へ　POST すると返却値にアクセストークンが渡ってくる&lt;/p&gt;
-
 &lt;p&gt;ここで取得したアクセストークンは音声データを作成する際に使いまわすものになる&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;subscription_key &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt; サブスクリプションキー &amp;gt;&amp;quot;&lt;/span&gt;
-headers &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-type&amp;quot;&lt;/span&gt;:              &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;application/x-www-form-urlencoded&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Ocp-Apim-Subscription-Key&amp;quot;&lt;/span&gt;: subscription_key
-}
-access_token_host &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;api.cognitive.microsoft.com&amp;quot;&lt;/span&gt;
-path &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/sts/v1.0/issueToken&amp;quot;&lt;/span&gt;
-
-conn &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; http&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;HTTPSConnection(access_token_host)
-conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;request(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;POST&amp;quot;&lt;/span&gt;, path, params, headers)
-response &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;getresponse()
-
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;status, response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;reason)
-
-data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;read()
-conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
-
-access_token &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; data&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;decode(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;UTF-8&amp;quot;&lt;/span&gt;)
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt; (&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Access Token: &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; access_token)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h2 id=&#34;音声データを作成する&#34;&gt;音声データを作成する&lt;/h2&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;subscription_key &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;lt; サブスクリプションキー &amp;gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;headers &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Content-type&amp;#34;&lt;/span&gt;:              &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;application/x-www-form-urlencoded&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Ocp-Apim-Subscription-Key&amp;#34;&lt;/span&gt;: subscription_key
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;access_token_host &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;api.cognitive.microsoft.com&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;path &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/sts/v1.0/issueToken&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conn &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;HTTPSConnection(access_token_host)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conn&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;request(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;, path, params, headers)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;response &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; conn&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;getresponse()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;status, response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;reason)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conn&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;access_token &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; data&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;decode(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;UTF-8&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; (&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Access Token: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; access_token)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;音声データを作成する&#34;&gt;音声データを作成する&lt;/h2&gt;
 &lt;p&gt;音声データを作成するには &lt;code&gt;https://speech.platform.bing.com/synthesize&lt;/code&gt; にデータを投げれば良い&lt;/p&gt;
-
 &lt;p&gt;上記のエンドポイントに対して喋らせる内容や声色はリクエストの POST クエリパラメータに &lt;a href=&#34;https://www.w3.org/TR/speech-synthesis/&#34;&gt;SSML 形式&lt;/a&gt; で入れて、アクセストークンや音声ファイルの形式なんかはリクエストの Header に入れればおｋ&lt;/p&gt;
-
 &lt;p&gt;プログラム中では日本語のテキストデータを与えると、発声データが wav ファイルとしてレスポンスデータに乗っかってくるので、ファイルとして書き出して保存する処理をしている&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;text &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;日本語しゃべります&amp;quot;&lt;/span&gt;
-body &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;speak version=&amp;#39;1.0&amp;#39; xml:lang=&amp;#39;en-us&amp;#39;&amp;gt;&amp;lt;voice xml:lang=&amp;#39;ja-jp&amp;#39; xml:gender=&amp;#39;Female&amp;#39; name=&amp;#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&amp;#39;&amp;gt;&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;&amp;lt;/voice&amp;gt;&amp;lt;/speak&amp;gt;&amp;quot;&lt;/span&gt;
-
-headers &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Content-type&amp;quot;&lt;/span&gt;:             &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;application/ssml+xml&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;X-Microsoft-OutputFormat&amp;quot;&lt;/span&gt;: &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;riff-16khz-16bit-mono-pcm&amp;quot;&lt;/span&gt;,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Authorization&amp;quot;&lt;/span&gt;:            &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Bearer &amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; access_token,
-    &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;User-Agent&amp;quot;&lt;/span&gt;:               &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Meriken&amp;quot;&lt;/span&gt;
-}
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# https://speech.platform.bing.com/synthesize&lt;/span&gt;
-conn &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; http&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;HTTPSConnection(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;speech.platform.bing.com&amp;quot;&lt;/span&gt;)
-conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;request(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;POST&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/synthesize&amp;quot;&lt;/span&gt;, body&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;utf-8&amp;#39;&lt;/span&gt;), headers)
-response &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;getresponse()
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;status, response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;reason)
-
-data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; response&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;read()
-conn&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
-
-wav &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;download-&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.wav&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;wb&amp;quot;&lt;/span&gt;)
-wav&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;write(data)
-wav&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;close()
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;実際に作成された wav ファイルがこれ&lt;/p&gt;
-
-&lt;p&gt;&lt;audio controls=&#34;&#34; width=&#34;250px&#34; height=&#34;150px&#34;&gt;
-    &lt;!-- &lt;source src=&#34;sample.mp3&#34; type=&#34;audio/mp3&#34;&gt; --&gt;
-    &lt;source src=&#34;sound1.wav&#34; type=&#34;audio/wav&#34;&gt;
-    &lt;embed src=&#34;sound1.wav&#34; type=&#34;audio/wav&#34; width=&#34;240&#34; height=&#34;50&#34; autostart=&#34;false&#34; controller=&#34;true&#34; loop=&#34;false&#34; pluginspage=&#34;http://www.apple.com/jp/quicktime/download/&#34;&gt;
-&lt;/audio&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;text &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;日本語しゃべります&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;body &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;lt;speak version=&amp;#39;1.0&amp;#39; xml:lang=&amp;#39;en-us&amp;#39;&amp;gt;&amp;lt;voice xml:lang=&amp;#39;ja-jp&amp;#39; xml:gender=&amp;#39;Female&amp;#39; name=&amp;#39;Microsoft Server Speech Text to Speech Voice (ja-JP, Ayumi, Apollo)&amp;#39;&amp;gt;&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&amp;lt;/voice&amp;gt;&amp;lt;/speak&amp;gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;headers &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Content-type&amp;#34;&lt;/span&gt;:             &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;application/ssml+xml&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;X-Microsoft-OutputFormat&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;riff-16khz-16bit-mono-pcm&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Authorization&amp;#34;&lt;/span&gt;:            &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Bearer &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; access_token,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;User-Agent&amp;#34;&lt;/span&gt;:               &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Meriken&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# https://speech.platform.bing.com/synthesize&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conn &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; http&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;client&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;HTTPSConnection(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;speech.platform.bing.com&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conn&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;request(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;POST&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/synthesize&amp;#34;&lt;/span&gt;, body&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;encode(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;utf-8&amp;#39;&lt;/span&gt;), headers)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;response &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; conn&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;getresponse()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;status, response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;reason)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; response&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;read()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;conn&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wav &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;download-&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; text &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.wav&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;wb&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wav&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;write(data)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;wav&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;close()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;実際に作成された wav ファイルがこれ&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
 &lt;h2 id=&#34;声色を変えてみる&#34;&gt;声色を変えてみる&lt;/h2&gt;
-
 &lt;p&gt;声色は何種類か用意されていて、日本語は男性声と女性声と 2 種類ある&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;ar-EG*	Female
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;ar-EG*	Female
 de-DE	Female
 de-DE	Male
 en-AU	Female
@@ -130,46 +103,33 @@ zh-HK	Female
 zh-HK	Male
 zh-TW	Female
 zh-TW	Male
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;英語の男性声でちょっと長めの文章を喋らせてみる&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;text = &amp;quot;The Voice Browser Working Group has sought to develop standards to enable access to the Web using spoken interaction. The Speech Synthesis Markup Language Specification is one of these standards and is designed to provide a rich, XML-based markup language for assisting the generation of synthetic speech in Web and other applications. The essential role of the markup language is to provide authors of synthesizable content a standard way to control aspects of speech such as pronunciation, volume, pitch, rate, etc. across different synthesis-capable platforms.&amp;quot;
-body = &amp;quot;&amp;lt;speak version=&#39;1.0&#39; xml:lang=&#39;en-us&#39;&amp;gt;&amp;lt;voice xml:lang=&#39;en-US&#39; xml:gender=&#39;Female&#39; name=&#39;Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)&#39;&amp;gt;&amp;quot; + text + &amp;quot;&amp;lt;/voice&amp;gt;&amp;lt;/speak&amp;gt;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;英語の男性声でちょっと長めの文章を喋らせてみる&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;text = &amp;#34;The Voice Browser Working Group has sought to develop standards to enable access to the Web using spoken interaction. The Speech Synthesis Markup Language Specification is one of these standards and is designed to provide a rich, XML-based markup language for assisting the generation of synthetic speech in Web and other applications. The essential role of the markup language is to provide authors of synthesizable content a standard way to control aspects of speech such as pronunciation, volume, pitch, rate, etc. across different synthesis-capable platforms.&amp;#34;
+body = &amp;#34;&amp;lt;speak version=&amp;#39;1.0&amp;#39; xml:lang=&amp;#39;en-us&amp;#39;&amp;gt;&amp;lt;voice xml:lang=&amp;#39;en-US&amp;#39; xml:gender=&amp;#39;Female&amp;#39; name=&amp;#39;Microsoft Server Speech Text to Speech Voice (en-US, BenjaminRUS)&amp;#39;&amp;gt;&amp;#34; + text + &amp;#34;&amp;lt;/voice&amp;gt;&amp;lt;/speak&amp;gt;&amp;#34;
 
 headers = {
-    &amp;quot;Content-type&amp;quot;:             &amp;quot;application/ssml+xml&amp;quot;,
-    &amp;quot;X-Microsoft-OutputFormat&amp;quot;: &amp;quot;riff-16khz-16bit-mono-pcm&amp;quot;,
-    &amp;quot;Authorization&amp;quot;:            &amp;quot;Bearer &amp;quot; + access_token,
-    &amp;quot;User-Agent&amp;quot;:               &amp;quot;Meriken&amp;quot;
+    &amp;#34;Content-type&amp;#34;:             &amp;#34;application/ssml+xml&amp;#34;,
+    &amp;#34;X-Microsoft-OutputFormat&amp;#34;: &amp;#34;riff-16khz-16bit-mono-pcm&amp;#34;,
+    &amp;#34;Authorization&amp;#34;:            &amp;#34;Bearer &amp;#34; + access_token,
+    &amp;#34;User-Agent&amp;#34;:               &amp;#34;Meriken&amp;#34;
 }
 
 # https://speech.platform.bing.com/synthesize
-conn = http.client.HTTPSConnection(&amp;quot;speech.platform.bing.com&amp;quot;)
-conn.request(&amp;quot;POST&amp;quot;, &amp;quot;/synthesize&amp;quot;, body.encode(&#39;utf-8&#39;), headers)
+conn = http.client.HTTPSConnection(&amp;#34;speech.platform.bing.com&amp;#34;)
+conn.request(&amp;#34;POST&amp;#34;, &amp;#34;/synthesize&amp;#34;, body.encode(&amp;#39;utf-8&amp;#39;), headers)
 response = conn.getresponse()
 print(response.status, response.reason)
 
 data = response.read()
 conn.close()
 
-wav = open(&amp;quot;sound2.wav&amp;quot;, &amp;quot;wb&amp;quot;)
+wav = open(&amp;#34;sound2.wav&amp;#34;, &amp;#34;wb&amp;#34;)
 wav.write(data)
 wav.close()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;出力結果はこれ&lt;/p&gt;
-
-&lt;p&gt;&lt;audio controls=&#34;&#34; width=&#34;250px&#34; height=&#34;150px&#34;&gt;
-    &lt;!-- &lt;source src=&#34;sample.mp3&#34; type=&#34;audio/mp3&#34;&gt; --&gt;
-    &lt;source src=&#34;sound2.wav&#34; type=&#34;audio/wav&#34;&gt;
-    &lt;embed src=&#34;sound2.wav&#34; type=&#34;audio/wav&#34; width=&#34;240&#34; height=&#34;50&#34; autostart=&#34;false&#34; controller=&#34;true&#34; loop=&#34;false&#34; pluginspage=&#34;http://www.apple.com/jp/quicktime/download/&#34;&gt;
-&lt;/audio&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;出力結果はこれ&lt;/p&gt;
+&lt;!-- raw HTML omitted --&gt;
 &lt;p&gt;いい感じ&lt;/p&gt;
-
 &lt;h2 id=&#34;参照リンク&#34;&gt;参照リンク&lt;/h2&gt;
-
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput&#34;&gt;https://docs.microsoft.com/ja-jp/azure/cognitive-services/Speech/api-reference-rest/bingvoiceoutput&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript&#34;&gt;https://github.com/Azure-Samples/Cognitive-Speech-STT-JavaScript&lt;/a&gt;&lt;/li&gt;
@@ -184,87 +144,54 @@ wav.close()
       <pubDate>Sun, 12 Mar 2017 14:45:51 JST</pubDate>
       <author>Alexander Ivanov</author>
       <guid>http://mitakeck.github.io/cnn-font-analyzer/</guid>
-      <description>
-
-&lt;h1 id=&#34;文字画像からフォントを推定したい&#34;&gt;文字画像からフォントを推定したい&lt;/h1&gt;
-
+      <description>&lt;h1 id=&#34;文字画像からフォントを推定したい&#34;&gt;文字画像からフォントを推定したい&lt;/h1&gt;
 &lt;p&gt;吊り広告や看板に使われているフォントがどういうフォントなのか気になるときがある。&lt;/p&gt;
-
 &lt;p&gt;そんなとき画像から使用されているフォントを推定してくれる Web サービスやシステムはいくつかある。&lt;/p&gt;
-
 &lt;p&gt;それらがどういうロジックでフォントを推定しているのかは分からないが、なんとなく作りたくなったので自作してみることにする。&lt;/p&gt;
-
 &lt;p&gt;今回は手始めに 10 種類のフォントを用いて、画像の中に写った文字を見てフォントを推定する仕組みを畳み込みニューラルネットワークを用いて作成してみる。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;about.png&#34; alt=&#34;about.png&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;about.png&#34; alt=&#34;about.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
-
 &lt;ul&gt;
 &lt;li&gt;入力は文字が書かれた画像データ
-
 &lt;ul&gt;
 &lt;li&gt;画像サイズは 64x64&lt;/li&gt;
 &lt;li&gt;画像中には 1 文字だけ描画&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;出力は推定した文字のフォント
-
 &lt;ul&gt;
 &lt;li&gt;ただし 推定は以下 10 個のフォントの中から行う&lt;/li&gt;
 &lt;li&gt;futura, gillsans, helvetica, opitma, andalemono, arial, impact, timenewroman, trebuchetms, verdana&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
-
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&#34;学習データの準備&#34;&gt;学習データの準備&lt;/h2&gt;
-
 &lt;p&gt;なにはともあれとりあえず学習データを用意する。&lt;/p&gt;
-
 &lt;p&gt;今回は学習データとして文字画像とその正解ラベルがあればいいので指定のフォントで文字が描画された画像を大量に用意する。&lt;/p&gt;
-
 &lt;p&gt;その際 ImageMagick を用いるとだいぶ楽ができる。&lt;/p&gt;
-
 &lt;h3 id=&#34;imagemagick-で画像を一括生成&#34;&gt;ImageMagick で画像を一括生成&lt;/h3&gt;
-
 &lt;p&gt;ImageMagick で指定フォントの文字画像を出力するには &lt;code&gt;font&lt;/code&gt; と &lt;code&gt;label&lt;/code&gt; オプションを最低限指定してやれば良い&lt;/p&gt;
-
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;-font&lt;/code&gt; にはフォントを指定&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;label&lt;/code&gt; には描画したい文字を指定&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;output&lt;/code&gt; には出力先の画像ファイル名を指定&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;pre&gt;&lt;code&gt; $ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;あと出力される画像の見栄えの調節用オプションとして &lt;code&gt;background&lt;/code&gt;, &lt;code&gt;fill&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, &lt;code&gt;gravity&lt;/code&gt; 等がある。&lt;/p&gt;
-
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font [font] label:[label] [output]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;あと出力される画像の見栄えの調節用オプションとして &lt;code&gt;background&lt;/code&gt;, &lt;code&gt;fill&lt;/code&gt;, &lt;code&gt;size&lt;/code&gt;, &lt;code&gt;gravity&lt;/code&gt; 等がある。&lt;/p&gt;
 &lt;p&gt;詳しくは &lt;a href=&#34;http://www.imagemagick.org/Usage/text/&#34;&gt;ImageMagick v6 Examples &amp;ndash;
- Text to Image Handling&lt;/a&gt; を参照のこと。&lt;/p&gt;
-
+Text to Image Handling&lt;/a&gt; を参照のこと。&lt;/p&gt;
 &lt;p&gt;例えば、フォントは Futura で a という文字が描画された画像を futura-a.png として出力場合は以下のような感じにオプションをしていしてやれば良い。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;以下、a から z までの画像を出力した例&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;futura-a.png&#34; alt=&#34;futura-a.png&#34; /&gt;&lt;/p&gt;
-
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;$ convert -background white -fill black -size 64x64 -gravity center -font /Library/Fonts/Futura.ttc label:a futura-a.png
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;以下、a から z までの画像を出力した例&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;futura-a.png&#34; alt=&#34;futura-a.png&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;いろいろなフォントで-a-z-の画像を出力する&#34;&gt;いろいろなフォントで a-z の画像を出力する&lt;/h3&gt;
-
 &lt;p&gt;シェル芸で 10 種類分のフォント画像を準備する。
 その際、フォント一覧とフォントファイルの場所を記述した &lt;code&gt;fonts.txt&lt;/code&gt; と、描画する文字データを記述した &lt;code&gt;data.txt&lt;/code&gt; を用いた。&lt;/p&gt;
-
 &lt;p&gt;&lt;code&gt;join&lt;/code&gt; で &lt;code&gt;fonts.txt&lt;/code&gt; と &lt;code&gt;data.txt&lt;/code&gt; をクロスジョインして &lt;code&gt;awk&lt;/code&gt; で &lt;code&gt;convert&lt;/code&gt; コマンドに文字列整形して &lt;code&gt;sh&lt;/code&gt; で実行しています。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, &#39;{print &amp;quot;convert -background white -fill black -size 64x64 -gravity center -font \&amp;quot;&amp;quot; $3 &amp;quot;\&amp;quot; label:&amp;quot; $4 &amp;quot; train/&amp;quot; $2 &amp;quot;/&amp;quot; $4 &amp;quot;.png&amp;quot;}&#39; | sh
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;一応実際に使用した &lt;code&gt;fonts.txt&lt;/code&gt; と &lt;code&gt;data.txt&lt;/code&gt; を載せておきます。&lt;/p&gt;
-
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;$ join -j `cat fonts.txt | wc -l` -t, fonts.txt data.txt | awk -F, &amp;#39;{print &amp;#34;convert -background white -fill black -size 64x64 -gravity center -font \&amp;#34;&amp;#34; $3 &amp;#34;\&amp;#34; label:&amp;#34; $4 &amp;#34; train/&amp;#34; $2 &amp;#34;/&amp;#34; $4 &amp;#34;.png&amp;#34;}&amp;#39; | sh
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;一応実際に使用した &lt;code&gt;fonts.txt&lt;/code&gt; と &lt;code&gt;data.txt&lt;/code&gt; を載せておきます。&lt;/p&gt;
 &lt;p&gt;fonts.txt&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;futura,/Library/Fonts/Futura.ttc
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;futura,/Library/Fonts/Futura.ttc
 gillsans,/Library/Fonts/GillSans.ttc
 helvetica,/System/Library/Fonts/HelveticaNeueDeskInterface.ttc
 opitma,/System/Library/Fonts/Optima.ttc
@@ -274,11 +201,8 @@ impact,/Library/Fonts/Impact.ttf
 timenewroman,/Library/Fonts/Times New Roman.ttf
 trebuchetms,/Library/Fonts/Trebuchet MS.ttf
 verdana,/Library/Fonts/Verdana.ttf
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;data.txt&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;a
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;data.txt&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;a
 b
 c
 d
@@ -304,16 +228,12 @@ w
 x
 y
 z
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;そして最後にディレクトリに配置する。&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;そして最後にディレクトリに配置する。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;train/&lt;/code&gt; には学習用のデータを配置する&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;validation&lt;/code&gt; にはテスト用のデータを配置する。&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;pre&gt;&lt;code&gt;.
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;.
 |-- train
 |   |-- andalemono
 |   |-- arial
@@ -336,135 +256,109 @@ z
     |-- timenewroman
     |-- trebuchetms
     `-- verdana
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;識別器の構築には keras を用いるのだが、以下のようなディレクトリ構成にしておくと、
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;識別器の構築には keras を用いるのだが、以下のようなディレクトリ構成にしておくと、
 keras 側でいろいろと自動で処理してくれる。
 非常に便利だ。&lt;/p&gt;
-
 &lt;h3 id=&#34;学習データのかさ増し&#34;&gt;学習データのかさ増し&lt;/h3&gt;
-
 &lt;p&gt;学習用のデータを傾けたり位置をずらしたりした画像を大量に生成することで学習データをかさ増しする。&lt;/p&gt;
-
 &lt;p&gt;ImageMagick でやれなくもないけど、Python のコードでかさ増しを行った。&lt;/p&gt;
-
 &lt;p&gt;以下のコード片が回転処理と移動処理をランダムに行うコードである。
 いずれも OpenCV の python ラッパーの &lt;code&gt;cv2&lt;/code&gt; を用いている。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;rotate&lt;/span&gt;(src):
-    rows,cols &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; src&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;shape
-    r &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;360&lt;/span&gt;)
-    M &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;getRotationMatrix2D((cols&lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;,rows&lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;), r, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)
-
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;warpAffine(src, M, (rows, cols), flags&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;INTER_LINEAR)
-
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;move&lt;/span&gt;(src):
-    rows,cols &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; src&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;shape
-    dx &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;)
-    dy &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;)
-    M &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;float32([[&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, dx],[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, dy]])
-
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;warpAffine(src,M,(cols,rows))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;指定画像に対して上記回転と移動処理を施し保存する処理。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;make&lt;/span&gt;(imgs, pathToDataset, pathToDatasetSaved, n&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;100&lt;/span&gt;):
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; img &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; imgs:
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; img&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;find(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.png&amp;quot;&lt;/span&gt;) &lt;span style=&#34;color: #555555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt; :
-            src &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;imread(pathToDataset &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; img, &lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;)
-            src &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;resize(src, (imgSize, imgSize))
-            src &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;bitwise_not(src)
-            prefix &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; img&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;split(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.&amp;quot;&lt;/span&gt;)[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]
-            &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; x &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;xrange&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, n):
-                dst &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; move(rotate(move(rotate(src))))
-                cv2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;imwrite(pathToDatasetSaved &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; prefix &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;-&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;{0:04d}&amp;quot;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;format(x) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.png&amp;quot;&lt;/span&gt;, dst)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id=&#34;imagerdatagenherator-作成&#34;&gt;ImagerDataGenherator 作成&lt;/h3&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;rotate&lt;/span&gt;(src):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    rows,cols &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; src&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;shape
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    r &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;360&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    M &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;getRotationMatrix2D((cols&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;,rows&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;), r, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;warpAffine(src, M, (rows, cols), flags&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;INTER_LINEAR)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;move&lt;/span&gt;(src):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    rows,cols &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; src&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;shape
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    dx &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;5&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    dy &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; random&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;uniform(&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;5&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    M &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;float32([[&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, dx],[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, dy]])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;warpAffine(src,M,(cols,rows))
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;指定画像に対して上記回転と移動処理を施し保存する処理。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;make&lt;/span&gt;(imgs, pathToDataset, pathToDatasetSaved, n&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;100&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; img &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; imgs:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; img&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;find(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.png&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#555&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt; :
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            src &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;imread(pathToDataset &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; img, &lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            src &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;resize(src, (imgSize, imgSize))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            src &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;bitwise_not(src)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            prefix &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; img&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;split(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.&amp;#34;&lt;/span&gt;)[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; x &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; xrange(&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, n):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                dst &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; move(rotate(move(rotate(src))))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                cv2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;imwrite(pathToDatasetSaved &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; prefix &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;{0:04d}&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;format(x) &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.png&amp;#34;&lt;/span&gt;, dst)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;imagerdatagenherator-作成&#34;&gt;ImagerDataGenherator 作成&lt;/h3&gt;
 &lt;p&gt;画像データのバッチを生成するために Keras では &lt;a href=&#34;https://keras.io/ja/preprocessing/image/&#34;&gt;ImageDataGenerator&lt;/a&gt; という仕組みが用意されている。&lt;/p&gt;
-
 &lt;p&gt;今回は白黒画像なので &lt;code&gt;color_mode&lt;/code&gt; を &lt;code&gt;grayscale&lt;/code&gt; にして、他クラス分類させたいので、&lt;code&gt;class_mode&lt;/code&gt; に &lt;code&gt;categorical&lt;/code&gt; を指定する。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;img_width, img_height &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;
-
-train_data_dir &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;../datasets/data/train&amp;quot;&lt;/span&gt;
-validation_data_dir &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;../datasets/data/validation&amp;quot;&lt;/span&gt;
-
-datagen &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; ImageDataGenerator(rescale&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1.&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;255&lt;/span&gt;)
-
-train_generator &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; datagen&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;flow_from_directory(
-        train_data_dir,
-        target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_width, img_height),
-        batch_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;,
-        color_mode&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;grayscale&amp;quot;&lt;/span&gt;,
-        class_mode&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;categorical&amp;quot;&lt;/span&gt;)
-
-validation_generator &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; datagen&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;flow_from_directory(
-        validation_data_dir,
-        target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_width, img_height),
-        batch_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;,
-        color_mode&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;grayscale&amp;quot;&lt;/span&gt;,
-        class_mode&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;categorical&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h2 id=&#34;学習モデル作成&#34;&gt;学習モデル作成&lt;/h2&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;img_width, img_height &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;64&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;64&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;train_data_dir &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;../datasets/data/train&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;validation_data_dir &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;../datasets/data/validation&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;datagen &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; ImageDataGenerator(rescale&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1.&lt;/span&gt;&lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;255&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;train_generator &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; datagen&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;flow_from_directory(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        train_data_dir,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        target_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(img_width, img_height),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        batch_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;64&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        color_mode&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;grayscale&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        class_mode&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;categorical&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;validation_generator &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; datagen&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;flow_from_directory(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        validation_data_dir,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        target_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(img_width, img_height),
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        batch_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;64&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        color_mode&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;grayscale&amp;#34;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        class_mode&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;categorical&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;学習モデル作成&#34;&gt;学習モデル作成&lt;/h2&gt;
 &lt;p&gt;次に NN の層を定義していく。&lt;/p&gt;
-
 &lt;p&gt;Keras では &lt;code&gt;Sequential&lt;/code&gt; モデルを最初に生成して、そいつに対して &lt;code&gt;.add()&lt;/code&gt; メソッドを用いて層を追加していく形で NN を構築していく。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;model &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; Sequential()
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color: #FF6600&#34;&gt;32&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, input_shape&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_width, img_height, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(MaxPooling2D(pool_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)))
-
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color: #FF6600&#34;&gt;32&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(MaxPooling2D(pool_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)))
-
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(MaxPooling2D(pool_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)))
-
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Flatten())
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Dense(&lt;span style=&#34;color: #FF6600&#34;&gt;64&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Dropout(&lt;span style=&#34;color: #FF6600&#34;&gt;0.5&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Dense(&lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;))
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;sigmoid&amp;#39;&lt;/span&gt;))
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;そしてモデルの学習の前に &lt;code&gt;compile()&lt;/code&gt; メソッドを使って幾つかの設定を行う必要がある。&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; Sequential()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color:#f60&#34;&gt;32&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;, input_shape&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(img_width, img_height, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;)))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(MaxPooling2D(pool_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;)))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color:#f60&#34;&gt;32&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(MaxPooling2D(pool_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;)))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Convolution2D(&lt;span style=&#34;color:#f60&#34;&gt;64&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(MaxPooling2D(pool_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;)))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Flatten())
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Dense(&lt;span style=&#34;color:#f60&#34;&gt;64&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;relu&amp;#39;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Dropout(&lt;span style=&#34;color:#f60&#34;&gt;0.5&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Dense(&lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;add(Activation(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;sigmoid&amp;#39;&lt;/span&gt;))
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;そしてモデルの学習の前に &lt;code&gt;compile()&lt;/code&gt; メソッドを使って幾つかの設定を行う必要がある。&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;loss&lt;/code&gt; : 損失関数の設定&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;optimizer&lt;/code&gt; : 最適化手法の設定&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;metrics&lt;/code&gt; : 評価指標の設定&lt;/li&gt;
 &lt;/ul&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;compile(loss&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;binary_crossentropy&amp;#39;&lt;/span&gt;,
-              optimizer&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Adam&amp;#39;&lt;/span&gt;,
-              metrics&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;accuracy&amp;#39;&lt;/span&gt;])
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;!-- ![model.png](model.png) --&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;compile(loss&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;binary_crossentropy&amp;#39;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;              optimizer&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Adam&amp;#39;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;              metrics&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;accuracy&amp;#39;&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;!-- raw HTML omitted --&gt;
 &lt;h2 id=&#34;学習&#34;&gt;学習&lt;/h2&gt;
-
 &lt;p&gt;いよいよモデルを学習させる。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# ハイパーパラメタ&lt;/span&gt;
-nb_epoch &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;300&lt;/span&gt;
-nb_train_samples &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;2048&lt;/span&gt;
-nb_validation_samples &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;832&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# 学習を行う&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# fit_generator() の返り値に学習過程のデータが得られる&lt;/span&gt;
-history &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;fit_generator(
-        train_generator,
-        samples_per_epoch&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;nb_train_samples,
-        nb_epoch&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;nb_epoch,
-        validation_data&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;validation_generator,
-        nb_val_samples&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;nb_validation_samples)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;pre&gt;&lt;code&gt;Epoch 1/300
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# ハイパーパラメタ&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nb_epoch &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;300&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nb_train_samples &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;2048&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nb_validation_samples &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;832&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 学習を行う&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# fit_generator() の返り値に学習過程のデータが得られる&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;history &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;fit_generator(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        train_generator,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        samples_per_epoch&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;nb_train_samples,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        nb_epoch&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;nb_epoch,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        validation_data&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;validation_generator,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        nb_val_samples&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;nb_validation_samples)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Epoch 1/300
 2048/2048 [==============================] - 13s - loss: 0.4733 - acc: 0.8062 - val_loss: 0.3308 - val_acc: 0.9000
 Epoch 2/300
 2048/2048 [==============================] - 13s - loss: 0.3765 - acc: 0.8884 - val_loss: 0.3329 - val_acc: 0.9000
@@ -495,130 +389,109 @@ Epoch 299/300
 2048/2048 [==============================] - 13s - loss: 0.0869 - acc: 0.9557 - val_loss: 0.0710 - val_acc: 0.9632
 Epoch 300/300
 2048/2048 [==============================] - 13s - loss: 0.0913 - acc: 0.9562 - val_loss: 0.0725 - val_acc: 0.9619
-&lt;/code&gt;&lt;/pre&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt; model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;evaluate_generator(validation_generator, nb_validation_samples)
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# [0.068484609230206564, 0.9645432738157419]&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# loss と accuracy の値が得られる&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code&gt;save_weights()&lt;/code&gt; メソッドを用いて、モデルを保存しておく&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# モデルを保存する&lt;/span&gt;
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;save_weights(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;e300.h5&amp;#39;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;識別精度
-&lt;img src=&#34;modelacc.png&#34; alt=&#34;modelacc.png&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt; model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;evaluate_generator(validation_generator, nb_validation_samples)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# [0.068484609230206564, 0.9645432738157419]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# loss と accuracy の値が得られる&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;save_weights()&lt;/code&gt; メソッドを用いて、モデルを保存しておく&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# モデルを保存する&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;save_weights(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;e300.h5&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;識別精度
+&lt;img src=&#34;modelacc.png&#34; alt=&#34;modelacc.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;ロス
-&lt;img src=&#34;modelloss.png&#34; alt=&#34;modelloss.png&#34; /&gt;&lt;/p&gt;
-
+&lt;img src=&#34;modelloss.png&#34; alt=&#34;modelloss.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;とりあえずモデルを使ってみる&#34;&gt;とりあえずモデルを使ってみる&lt;/h2&gt;
-
 &lt;p&gt;てきとうに画像を突っ込んでフォントを推定してみる&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# 推定処理&lt;/span&gt;
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;keras.preprocessing&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; image
-fonts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
-lefts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;array([&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;4&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;6&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;7&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;8&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;9&lt;/span&gt;])
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# 学習済みの重みをロード&lt;/span&gt;
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;load_weights(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;e300.h5&amp;#39;&lt;/span&gt;)
-model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;compile(loss&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;binary_crossentropy&amp;#39;&lt;/span&gt;,
-              optimizer&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Adam&amp;#39;&lt;/span&gt;,
-              metrics&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;accuracy&amp;#39;&lt;/span&gt;])
-
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# 適当にデータを読み込ませる&lt;/span&gt;
-filename &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;../datasets/data/validation/andalemono/f-0911.png&amp;quot;&lt;/span&gt;
-
-img &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;)
-x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;img_to_array(img)
-x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;expand_dims(x, axis&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;)
-
-x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; x &lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;255.0&lt;/span&gt;
-
-pred &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;predict(x)[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]
-plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;subplot(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)
-plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;imshow(img)
-plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;subplot(&lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;2&lt;/span&gt;)
-plt&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, tick_label&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;fonts, align&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;center&amp;quot;&lt;/span&gt;)
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 推定処理&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;keras.preprocessing&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; image
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;fonts &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;andalemono&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;arial&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;futura&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;gillsans&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;helvetica&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;impact&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;opitma&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;timenewroman&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;trebuchetms&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;verdana&amp;#34;&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;lefts &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;array([&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;3&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;4&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;6&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;7&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;8&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;9&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 学習済みの重みをロード&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;load_weights(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;e300.h5&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;compile(loss&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;binary_crossentropy&amp;#39;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;              optimizer&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Adam&amp;#39;&lt;/span&gt;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;              metrics&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;[&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;accuracy&amp;#39;&lt;/span&gt;])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# 適当にデータを読み込ませる&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;filename &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;../datasets/data/validation/andalemono/f-0911.png&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;img &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;img_to_array(img)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;expand_dims(x, axis&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; x &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;255.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pred &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;predict(x)[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;plt&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;subplot(&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;plt&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;imshow(img)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;plt&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;subplot(&lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;2&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;plt&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;barh(lefts, pred, tick_label&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;fonts, align&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;center&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;predict.png&#34; alt=&#34;predict.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;いい感じ。&lt;/p&gt;
-
 &lt;h3 id=&#34;混合行列を描画する&#34;&gt;混合行列を描画する&lt;/h3&gt;
-
 &lt;p&gt;さっきの予測処理を関数化する&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color: #CC00FF&#34;&gt;predict&lt;/span&gt;(imagepath):
-    fonts &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
-    img &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;True&lt;/span&gt;)
-    x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;img_to_array(img)
-    x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;expand_dims(x, axis&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;)
-
-    x &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; x &lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;255.0&lt;/span&gt;
-
-    pred &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;predict(x)[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]
-    pred_index &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;argmax(pred)
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;return&lt;/span&gt; pred_index, fonts[pred_index]
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;テスト用データに対して予測処理をして、配列に格納する処理&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;data &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;a&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;b&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;c&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;d&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;e&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;f&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;g&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;h&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;i&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;j&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;k&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;l&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;m&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;n&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;o&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;p&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;q&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;r&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;s&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;t&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;u&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;v&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;w&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;x&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;y&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;z&amp;quot;&lt;/span&gt;]
-
-acc &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [[], [], [], [], [], [], [], [], [], []]
-incre &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1.0&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;260.0&lt;/span&gt;
-
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; font &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; fonts:
-    font_index &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; fonts&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;index(font)
-    acc[font_index] &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color: #FF6600&#34;&gt;0.0&lt;/span&gt;]
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; d &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; data:
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;xrange&lt;/span&gt;(&lt;span style=&#34;color: #FF6600&#34;&gt;10&lt;/span&gt;):
-            &lt;span style=&#34;color: #336666&#34;&gt;file&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;../datasets/data/validation/&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; font &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;/&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; d &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;-091&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;str&lt;/span&gt;(i) &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;.png&amp;quot;&lt;/span&gt;
-            pred &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; predict(&lt;span style=&#34;color: #336666&#34;&gt;file&lt;/span&gt;)
-            acc[font_index][pred[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]] &lt;span style=&#34;color: #555555&#34;&gt;+=&lt;/span&gt; incre
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;最後に混合行列を描画する。
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#c0f&#34;&gt;predict&lt;/span&gt;(imagepath):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    fonts &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;andalemono&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;arial&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;futura&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;gillsans&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;helvetica&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;impact&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;opitma&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;timenewroman&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;trebuchetms&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;verdana&amp;#34;&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    img &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;load_img(filename, target_size&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;(img_height, img_width), grayscale&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;True&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; image&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;img_to_array(img)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;expand_dims(x, axis&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    x &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; x &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;255.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    pred &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; model&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;predict(x)[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    pred_index &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; np&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;argmax(pred)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;return&lt;/span&gt; pred_index, fonts[pred_index]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;テスト用データに対して予測処理をして、配列に格納する処理&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;data &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;a&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;b&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;c&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;d&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;e&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;f&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;g&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;h&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;i&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;j&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;k&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;l&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;m&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;n&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;o&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;p&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;q&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;r&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;s&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;t&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;u&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;v&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;w&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;x&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;y&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;z&amp;#34;&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;acc &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [[], [], [], [], [], [], [], [], [], []]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;incre &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1.0&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;260.0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; font &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; fonts:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    font_index &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; fonts&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;index(font)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    acc[font_index] &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;, &lt;span style=&#34;color:#f60&#34;&gt;0.0&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; d &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; data:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; i &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; xrange(&lt;span style=&#34;color:#f60&#34;&gt;10&lt;/span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            file &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;../datasets/data/validation/&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; font &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;/&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; d &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;-091&amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;str&lt;/span&gt;(i) &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;.png&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            pred &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; predict(file)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            acc[font_index][pred[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;]] &lt;span style=&#34;color:#555&#34;&gt;+=&lt;/span&gt; incre
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;最後に混合行列を描画する。
 描画には &lt;code&gt;matplotlib&lt;/code&gt; で行った。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; specgram
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.metrics&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; confusion_matrix
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.svm&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; LinearSVC
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;sklearn.utils&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; resample
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;matplotlib&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; pylab
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;numpy&lt;/span&gt; &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color: #00CCFF; font-weight: bold&#34;&gt;np&lt;/span&gt;
-
-cm &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; acc
-name_list &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;andalemono&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;arial&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;futura&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;gillsans&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;helvetica&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;impact&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;opitma&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;timenewroman&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;trebuchetms&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;verdana&amp;quot;&lt;/span&gt;]
-title &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;Font Prediction&amp;quot;&lt;/span&gt;
-
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;clf()
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;matshow(cm, fignum&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #336666&#34;&gt;False&lt;/span&gt;, cmap&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Blues&amp;#39;&lt;/span&gt;, vmin&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;, vmax&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;)
-ax &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;axes()
-ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_xticks(&lt;span style=&#34;color: #336666&#34;&gt;range&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;len&lt;/span&gt;(name_list)))
-ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_xticklabels(name_list, rotation&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #FF6600&#34;&gt;90&lt;/span&gt;)
-ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;xaxis&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_ticks_position(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;bottom&amp;quot;&lt;/span&gt;)
-ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_yticks(&lt;span style=&#34;color: #336666&#34;&gt;range&lt;/span&gt;(&lt;span style=&#34;color: #336666&#34;&gt;len&lt;/span&gt;(name_list)))
-ax&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;set_yticklabels(name_list)
-
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;title(title)
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;colorbar()
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;grid(&lt;span style=&#34;color: #336666&#34;&gt;False&lt;/span&gt;)
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;xlabel(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;Predict class&amp;#39;&lt;/span&gt;)
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;ylabel(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;True class&amp;#39;&lt;/span&gt;)
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;grid(&lt;span style=&#34;color: #336666&#34;&gt;False&lt;/span&gt;)
-pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;show()
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;img src=&#34;confusion_matrix.png&#34; alt=&#34;confusion_matrix.png&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; specgram
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;sklearn.metrics&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; confusion_matrix
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;sklearn.svm&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; LinearSVC
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;sklearn.utils&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; resample
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;from&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;matplotlib&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; pylab
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;numpy&lt;/span&gt; &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;as&lt;/span&gt; &lt;span style=&#34;color:#0cf;font-weight:bold&#34;&gt;np&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;cm &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; acc
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;name_list &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; [&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;andalemono&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;arial&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;futura&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;gillsans&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;helvetica&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;impact&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;opitma&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;timenewroman&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;trebuchetms&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;verdana&amp;#34;&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;title &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;Font Prediction&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;clf()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;matshow(cm, fignum&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;False&lt;/span&gt;, cmap&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Blues&amp;#39;&lt;/span&gt;, vmin&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;, vmax&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ax &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;axes()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ax&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set_xticks(&lt;span style=&#34;color:#366&#34;&gt;range&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;len&lt;/span&gt;(name_list)))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ax&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set_xticklabels(name_list, rotation&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#f60&#34;&gt;90&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ax&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;xaxis&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set_ticks_position(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;bottom&amp;#34;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ax&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set_yticks(&lt;span style=&#34;color:#366&#34;&gt;range&lt;/span&gt;(&lt;span style=&#34;color:#366&#34;&gt;len&lt;/span&gt;(name_list)))
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ax&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;set_yticklabels(name_list)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;title(title)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;colorbar()
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;grid(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;False&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;xlabel(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;Predict class&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;ylabel(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;True class&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;grid(&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;False&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pylab&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;show()
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;confusion_matrix.png&#34; alt=&#34;confusion_matrix.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;まとめ&#34;&gt;まとめ&lt;/h2&gt;
-
 &lt;ul&gt;
 &lt;li&gt;ある程度精度は出るっぽいので、対象フォント数を増やしたい
-
 &lt;ul&gt;
 &lt;li&gt;なぜか Helvetica の認識率だけ悪いのは気になる&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;li&gt;実際にフォント推定器をスマホアプリとかに埋め込みたい&lt;/li&gt;
 &lt;/ul&gt;
 </description>
@@ -630,92 +503,80 @@ pylab&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;show()
       <pubDate>Mon, 06 Mar 2017 02:31:37 JST</pubDate>
       <author>Alexander Ivanov</author>
       <guid>http://mitakeck.github.io/oreilly-free-ebooks-dl/</guid>
-      <description>
-
-&lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
-
+      <description>&lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
 &lt;p&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;freebora&lt;/a&gt; という Oreilly の無料電子書籍をダウンロードするコマンドラインツールがある。
-Python で書かれており、ソースコードは Github で公開されている。&lt;br /&gt;
+Python で書かれており、ソースコードは Github で公開されている。&lt;br&gt;
 電子書籍のダウンロードロジックが気になったので、ソースコードを探索してみた。&lt;/p&gt;
-
-&lt;hr /&gt;
-
+&lt;hr&gt;
 &lt;h2 id=&#34;ソースコード探索&#34;&gt;ソースコード探索&lt;/h2&gt;
-
 &lt;p&gt;探索と言っても重要な部分は  &lt;a href=&#34;https://github.com/deeplook/freebora/blob/master/freebora/freebora.py&#34;&gt;&lt;code&gt;freebora/freebora/freebora.py&lt;/code&gt;&lt;/a&gt; 内にすべてまとまっていて、大まかに以下の流れで無料電子書籍を抽出/ダウンロードしていた。&lt;/p&gt;
-
 &lt;ul&gt;
-&lt;li&gt;1. &lt;code&gt;http://shop.oreilly.com/category/ebooks.do&lt;/code&gt; にアクセスしカテゴリ一覧を取得&lt;/li&gt;
-&lt;li&gt;2. &lt;code&gt;http://shop.oreilly.com/category/ebooks/[category].do&lt;/code&gt; にアクセスし電子書籍一覧を取得&lt;/li&gt;
-&lt;li&gt;3. 値段が &lt;code&gt;$0.00&lt;/code&gt; に設定されている電子書籍ページ URL を抽出&lt;/li&gt;
-&lt;li&gt;4. 対象電子書籍ページの URL を整形して、ダウンロード&lt;/li&gt;
+&lt;li&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;http://shop.oreilly.com/category/ebooks.do&lt;/code&gt; にアクセスしカテゴリ一覧を取得&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;&lt;code&gt;http://shop.oreilly.com/category/ebooks/[category].do&lt;/code&gt; にアクセスし電子書籍一覧を取得&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;値段が &lt;code&gt;$0.00&lt;/code&gt; に設定されている電子書籍ページ URL を抽出&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;対象電子書籍ページの URL を整形して、ダウンロード&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;p&gt;処理 4. のダウンロード URL 整形処理に関してだけ補足。&lt;/p&gt;
-
-&lt;p&gt;以下に &lt;code&gt;freebora&lt;/code&gt; から抜粋したソースコードを掲載する。&lt;br /&gt;
+&lt;p&gt;以下に &lt;code&gt;freebora&lt;/code&gt; から抜粋したソースコードを掲載する。&lt;br&gt;
 ソースコード内の &lt;code&gt;for&lt;/code&gt; 内部が処理 4 となる。
 重要なのは &lt;code&gt;re.sub()&lt;/code&gt; で、それぞれの URL を &lt;code&gt;.csp&lt;/code&gt; を &lt;code&gt;.pdf&lt;/code&gt; に&lt;code&gt;/free/&lt;/code&gt; を &lt;code&gt;/free/files/&lt;/code&gt; に置換する処理を行っている。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #555555&#34;&gt;...&lt;/span&gt;
-&lt;span style=&#34;color: #0099FF; font-style: italic&#34;&gt;# https://github.com/deeplook/freebora/blob/master/freebora/freebora.py#L56-L73 より引用&lt;/span&gt;
-t2 &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; etree&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;parse(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://shop.oreilly.com&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; page_url, parser&lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt;p)
-xp &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;//span[@class=&amp;quot;price&amp;quot;][contains(., &amp;quot;$0.00&amp;quot;)]/&amp;#39;&lt;/span&gt;\
-     &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;../../../../div[@class=&amp;quot;thumbheader&amp;quot;]/a/@href&amp;#39;&lt;/span&gt;
-paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;xpath(xp)
-&lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;for&lt;/span&gt; j, path &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;enumerate&lt;/span&gt;(paths):
-    url &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://shop.oreilly.com&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;+&lt;/span&gt; path
-    html &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; requests&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;get(url)&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;text
-    url_csps &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;findall(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;path_info\:\s+(.*?\.csp)&amp;#39;&lt;/span&gt;, html)
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #336666&#34;&gt;len&lt;/span&gt;(url_csps) &lt;span style=&#34;color: #555555&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color: #FF6600&#34;&gt;1&lt;/span&gt;:
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;continue&lt;/span&gt;
-    url_csp &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; url_csps[&lt;span style=&#34;color: #FF6600&#34;&gt;0&lt;/span&gt;]
-    url_csp &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;\?.*&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, url_csp)
-    url_pdf &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;\.csp&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;.pdf&amp;#39;&lt;/span&gt;, url_csp)
-    url_pdf &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color: #555555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;/free/&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;/free/files/&amp;#39;&lt;/span&gt;, url_pdf)
-    u &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;http://www.oreilly.com/&lt;/span&gt;&lt;span style=&#34;color: #AA0000&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color: #555555&#34;&gt;%&lt;/span&gt; url_pdf
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;if&lt;/span&gt; verbose:
-        &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;print&lt;/span&gt;(u)
-    &lt;span style=&#34;color: #006699; font-weight: bold&#34;&gt;yield&lt;/span&gt; u
-&lt;span style=&#34;color: #555555&#34;&gt;...&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;実際の無料電子書籍 URL から手動で上記処理 4 を実行してみる。&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# https://github.com/deeplook/freebora/blob/master/freebora/freebora.py#L56-L73 より引用&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;t2 &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; etree&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;parse(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://shop.oreilly.com&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; page_url, parser&lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt;p)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;xp &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;//span[@class=&amp;#34;price&amp;#34;][contains(., &amp;#34;$0.00&amp;#34;)]/&amp;#39;&lt;/span&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;     &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;../../../../div[@class=&amp;#34;thumbheader&amp;#34;]/a/@href&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;paths &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; t2&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;xpath(xp)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;for&lt;/span&gt; j, path &lt;span style=&#34;color:#000;font-weight:bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;enumerate&lt;/span&gt;(paths):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    url &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://shop.oreilly.com&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;+&lt;/span&gt; path
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    html &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; requests&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;get(url)&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;text
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    url_csps &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;findall(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;path_info\:\s+(.*?\.csp)&amp;#39;&lt;/span&gt;, html)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#366&#34;&gt;len&lt;/span&gt;(url_csps) &lt;span style=&#34;color:#555&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color:#f60&#34;&gt;1&lt;/span&gt;:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;continue&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    url_csp &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; url_csps[&lt;span style=&#34;color:#f60&#34;&gt;0&lt;/span&gt;]
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    url_csp &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;\?.*&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, url_csp)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    url_pdf &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;\.csp&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;.pdf&amp;#39;&lt;/span&gt;, url_csp)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    url_pdf &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; re&lt;span style=&#34;color:#555&#34;&gt;.&lt;/span&gt;sub(&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/free/&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;/free/files/&amp;#39;&lt;/span&gt;, url_pdf)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    u &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;http://www.oreilly.com/&lt;/span&gt;&lt;span style=&#34;color:#a00&#34;&gt;%s&lt;/span&gt;&lt;span style=&#34;color:#c30&#34;&gt;&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#555&#34;&gt;%&lt;/span&gt; url_pdf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;if&lt;/span&gt; verbose:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#366&#34;&gt;print&lt;/span&gt;(u)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#069;font-weight:bold&#34;&gt;yield&lt;/span&gt; u
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#555&#34;&gt;...&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;実際の無料電子書籍 URL から手動で上記処理 4 を実行してみる。&lt;/p&gt;
 &lt;p&gt;下記 URL は『Guidelines for Keeping Pace with Innovation and Tech Adoption』という電子書籍のページ。こいつに対してさっきの置換処理を実行する。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;oreilly1.png&#34; alt=&#34;oreilly1.png&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;oreilly1.png&#34; alt=&#34;oreilly1.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp&#34;&gt;http://www.oreilly.com/business/free/guidelines-for-keeping-pace-with-innovation-and-tech-adoption.csp&lt;/a&gt; に対して &lt;code&gt;.csp&lt;/code&gt; を &lt;code&gt;.pdf&lt;/code&gt; に&lt;code&gt;/free/&lt;/code&gt; を &lt;code&gt;/free/files/&lt;/code&gt; に置換する処理を施す。
 すると対象電子書籍の PDF を閲覧することが出来る URL が生成される。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;url.png&#34; alt=&#34;url.prg&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;url.png&#34; alt=&#34;url.prg&#34;&gt;&lt;/p&gt;
 &lt;p&gt;アクセスしてみる。&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;oreilly2.png&#34; alt=&#34;oreilly2.png&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;oreilly2.png&#34; alt=&#34;oreilly2.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;対象書籍の PDF を閲覧できた。&lt;/p&gt;
-
 &lt;h2 id=&#34;気づき&#34;&gt;気づき&lt;/h2&gt;
-
-&lt;h3 id=&#34;1-http-www-oreilly-com-category-free-からスクレイプしたほうが早い&#34;&gt;1.&lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt;からスクレイプしたほうが早い&lt;/h3&gt;
-
+&lt;h3 id=&#34;1httpwwworeillycomcategoryfreeからスクレイプしたほうが早い&#34;&gt;1.&lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt;からスクレイプしたほうが早い&lt;/h3&gt;
 &lt;p&gt;freedora は &lt;code&gt;http://shop.oreilly.com/category/ebooks/[category].do&lt;/code&gt; から無料になっている電子書籍を探していたが、実は Oreilly さんが無料本に関しては &lt;code&gt;http://www.oreilly.com/[category]/free/&lt;/code&gt; にまとめてくれている。
 なのでそちらからスクレイピングしたほうが処理としてはスマートになりそう。&lt;/p&gt;
-
 &lt;p&gt;ちなみにカテゴリは以下のものがあります&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f0f3f3&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;category &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;business&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;data&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;iot&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;design&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;programming&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;security&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;web-platform&amp;quot;&lt;/span&gt;, &lt;span style=&#34;color: #CC3300&#34;&gt;&amp;quot;webops&amp;quot;&lt;/span&gt;}
-&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id=&#34;2-pdf-以外のフォーマットもダウンロードできる&#34;&gt;2. PDF 以外のフォーマットもダウンロードできる&lt;/h3&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;category &lt;span style=&#34;color:#555&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;business&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;data&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;iot&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;design&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;programming&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;security&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;web-platform&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;webops&amp;#34;&lt;/span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;2-pdf-以外のフォーマットもダウンロードできる&#34;&gt;2. PDF 以外のフォーマットもダウンロードできる&lt;/h3&gt;
 &lt;p&gt;freedora では PDF 形式の電子書籍をダウンロードしてくるのだが、
 &lt;code&gt;.pdf&lt;/code&gt; 以外にも &lt;code&gt;.epub&lt;/code&gt;, &lt;code&gt;.mobi&lt;/code&gt; フォーマットの存在を確認した。&lt;/p&gt;
-
 &lt;p&gt;Kindle Paper で電子書籍を読んでいると &lt;code&gt;.pdf&lt;/code&gt; より &lt;code&gt;.mobi&lt;/code&gt; のほうが扱いが良かったりするので、必要に合わせてフォーマットを指定すると良さげ。&lt;/p&gt;
-
 &lt;h2 id=&#34;参考-url-等&#34;&gt;参考 URL 等&lt;/h2&gt;
-
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/deeplook/freebora&#34;&gt;https://github.com/deeplook/freebora&lt;/a&gt; : Download free ebooks from O&amp;rsquo;Reilly.&lt;/li&gt;
 &lt;/ul&gt;
@@ -728,30 +589,27 @@ paths &lt;span style=&#34;color: #555555&#34;&gt;=&lt;/span&gt; t2&lt;span style
       <pubDate>Mon, 06 Mar 2017 00:38:19 JST</pubDate>
       <author>Alexander Ivanov</author>
       <guid>http://mitakeck.github.io/page/</guid>
-      <description>
-
-&lt;h1 id=&#34;hugo-のテスト&#34;&gt;hugo のテスト&lt;/h1&gt;
-
+      <description>&lt;h1 id=&#34;hugo-のテスト&#34;&gt;hugo のテスト&lt;/h1&gt;
 &lt;ul&gt;
 &lt;li&gt;シンタックスハイライトとか&lt;/li&gt;
 &lt;/ul&gt;
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg
-
-% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg
-
-% curl -Lso-  http://www.asahi.com/articles/ASHD96K3YHD9UTIL04L.html | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://www.asahicom.jp/articles/images/AS20151209004367_comm.jpg
-
-% curl -Lso- http://www.cnn.co.jp/world/35074672.html  | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;              
-# =&gt; http://www.cnn.co.jp/storage/2015/12/09/26290e751df22d92b3d72b36a65d95b3/france-russia-police-dog.jpg
-
-% curl -Lso-  http://ggsoku.com/2015/12/minecraft-for-wii-u-released-1217/ | grep meta |  grep og:image | sed -e &#34;s/.*content=\&#34;\(.*\)\&#34;.*/\1/g&#34;
-# =&gt; http://ggsoku.com/index.php?aam_media=101921&amp;size=original
-
-%
-</description>
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;background-color:#f0f3f3;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-zsh&#34; data-lang=&#34;zsh&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;s/.*content=\&amp;#34;\(.*\)\&amp;#34;.*/\1/g&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# =&amp;gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;% curl -Lso-  http://mainichi.jp/articles/20151210/k00/00m/040/010000c | grep meta |  grep og:image | sed -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;s/.*content=\&amp;#34;\(.*\)\&amp;#34;.*/\1/g&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# =&amp;gt; http://cdn.mainichi.jp/vol1/2015/12/10/20151210k0000m040023000p/91.jpg&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;% curl -Lso-  http://www.asahi.com/articles/ASHD96K3YHD9UTIL04L.html | grep meta |  grep og:image | sed -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;s/.*content=\&amp;#34;\(.*\)\&amp;#34;.*/\1/g&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# =&amp;gt; http://www.asahicom.jp/articles/images/AS20151209004367_comm.jpg&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;% curl -Lso- http://www.cnn.co.jp/world/35074672.html  | grep meta |  grep og:image | sed -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;s/.*content=\&amp;#34;\(.*\)\&amp;#34;.*/\1/g&amp;#34;&lt;/span&gt;              
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# =&amp;gt; http://www.cnn.co.jp/storage/2015/12/09/26290e751df22d92b3d72b36a65d95b3/france-russia-police-dog.jpg&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;% curl -Lso-  http://ggsoku.com/2015/12/minecraft-for-wii-u-released-1217/ | grep meta |  grep og:image | sed -e &lt;span style=&#34;color:#c30&#34;&gt;&amp;#34;s/.*content=\&amp;#34;\(.*\)\&amp;#34;.*/\1/g&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#09f;font-style:italic&#34;&gt;# =&amp;gt; http://ggsoku.com/index.php?aam_media=101921&amp;amp;#038;size=original&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;%
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</description>
     </item>
     
   </channel>
