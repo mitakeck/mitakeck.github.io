@@ -1,5 +1,5 @@
 	{{ $baseurl := .Site.BaseURL }}
-	{{ template "theme/chrome/header.html" . }}
+	{{ template "chrome/header.html" . }}
 	    <!-- CONTENT -->
 	  <div class="post">
 	    <header class="post-header">
@@ -18,9 +18,9 @@
 	        {{ .Content }}
 	    </div>
 	    <!-- END CONTENT -->
-	{{ template "theme/chrome/about.html" . }}
+	{{ template "chrome/about.html" . }}
 		<nav id="pagination">
 			{{if .Prev}}<a class="prev" href="{{.Prev.Permalink}}">Prev</a>{{end}}
 			{{if .Next}}<a class="next" href="{{.Next.Permalink}}">Next</a>{{end}}
 		</nav>
-	{{ template "theme/chrome/footer.html" . }}
+	{{ template "chrome/footer.html" . }}
